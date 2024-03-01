@@ -1,0 +1,49 @@
+.categories-container {
+    padding: 20px;
+  }
+  
+  .add-category-form {
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .add-category-form label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .add-category-form input[type="text"],
+  .add-category-form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .add-category-form button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .add-category-form button:last-child {
+    margin-right: 0;
+  }
+  
+  .add-category-form span {
+    color: red;
+  }
+  
+  /* Hide the form by default */
+  .add-category-form {
+    display: none;
+  }
+  
+  /* Show the form when it's open */
+  .add-category-form.open {
+    display: block;
+  }
+  
