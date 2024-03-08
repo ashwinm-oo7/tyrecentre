@@ -1,103 +1,211 @@
 import React, { Component } from 'react';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Link } from 'react-router-dom';
 
 class Subcategories extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedOption: '',
-      subcategoryOptions: [],
-      newOption: '',
+      categoryOptions: [],
+      selectedCategory: '',
+      subCategoryName: '',
+      selectedSubCategory:'',
+      subCategoryDescription: '',
+      tyreCompanyName: '',
+      tyreCompanyDescription: '',
+
+      // Other state variables for subcategories
     };
-    this.handleOptionChange = this.handleOptionChange.bind(this);
-    this.handleAddOption = this.handleAddOption.bind(this);
-    this.handleAddSubcategory = this.handleAddSubcategory.bind(this);
+
+  
+  this.handleAddButtonClick = this.handleAddButtonClick.bind(this);
+  this.handleSubCategoryNameChange = this.handleSubCategoryNameChange.bind(this);
+  this.handleSubCategoryDescriptionChange = this.handleSubCategoryDescriptionChange.bind(this);
+
+  this.handleAddSubCategory = this.handleAddSubCategory.bind(this);
+}
+
+
+
+
+  handleAddButtonClick() {
+    this.setState({ isOpen: true });
+  }
+  handleSubCategoryNameChange(event) {
+    this.setState({ subCategoryName: event.target.value });
   }
 
-  async componentDidMount() {
-    // Fetch subcategory options based on the category name
-    const { categoryName } = this.props;
+  handleSubCategoryDescriptionChange(event) {
+    this.setState({ subCategoryDescription: event.target.value });
+
+  }
+
+  
+  
+
+
+  handleAddSubCategory =async(e) => {
+    e.preventDefault();
+
+    console.log(this.state);
+    
+    let data ={
+        categoryName : this.state.selectedCategory,
+        subCategoryName : this.state.subCategoryName,
+        subCategoryDescription: this.state.subCategoryDescription        
+    }
     try {
-      const response = await fetch(`http://localhost:8080/getSubcategoryOptions?categoryName=${categoryName}`);
+        const response = await fetch('http://localhost:8080/subcategory/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          console.log(response);
+          toast.success('Add successfully');          
+
+          // Redirect or perform any other actions after successful registration
+        } else {
+          if(response.status === 406) {
+            toast.warning('Duplicate Data');
+          } else {
+            toast.error('Failed to Add category');
+          }
+        }
+      } catch (error) {
+        toast.error('Error during user Category:', error);
+      }
+  }
+
+  componentDidMount() {
+    console.log('didmount');
+    this.fetchCategoryOptions();
+  }
+
+
+  
+  handleCategoryChange = async (e) => {
+    const selectedCategory = e.target.value;
+  
+    await this.setState({ selectedCategory });
+  
+    // Reset subcategory and tyre category options when the category changes
+    this.setState({
+      selectedSubCategory: '',
+      tyreCategoryOptions: []
+    });
+  
+    // Fetch subcategory options
+    this.fetchSubCategoryOptions(selectedCategory); 
+  };
+  
+  handleSubCategoryChange = async (e) => {
+    const selectedSubCategory = e.target.value;
+  
+    await this.setState({ selectedSubCategory });
+  
+    // Fetch tyre category options
+    this.fetchTyreCategoryOptions(this.state.selectedCategory, selectedSubCategory); 
+  };
+  
+
+  fetchCategoryOptions = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/category/allCategory', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
       if (response.ok) {
         const data = await response.json();
-        this.setState({ subcategoryOptions: data });
+        console.log('Category options:', data); // Log fetched category options
+        
+        const categoryNames = data.map(category => category.categoryName);
+
+        this.setState({ categoryOptions: categoryNames });
       } else {
-        console.error('Failed to fetch subcategory options');
+        console.error('Failed to fetch category options');
       }
     } catch (error) {
-      console.error('Error fetching subcategory options:', error);
+      console.error('Error fetching category options:', error);
     }
-  }
+  };
 
-  handleOptionChange(event) {
-    this.setState({ selectedOption: event.target.value });
-  }
-
-  handleAddOption(event) {
-    this.setState({ newOption: event.target.value });
-  }
-
-  async handleAddSubcategory() {
-    // Handle adding subcategory based on the selected option
-    const { selectedOption, newOption } = this.state;
-    const { categoryName } = this.props;
-    
-    let url = '';
-    if (selectedOption === 'Add an option') {
-      // Add the new option
-      url = `http://localhost:8080/addSubcategory?categoryName=${categoryName}&subcategory=${newOption}`;
-    } else {
-      // Use the selected option
-      url = `http://localhost:8080/addSubcategory?categoryName=${categoryName}&subcategory=${selectedOption}`;
-    }
-
-    try {
-      const response = await fetch(url);
-      if (response.ok) {
-        console.log('Subcategory added successfully');
-        // Clear the selected option
-        this.setState({ selectedOption: '', newOption: '' });
-      } else {
-        console.error('Failed to add subcategory');
-      }
-    } catch (error) {
-      console.error('Error adding subcategory:', error);
-    }
-  }
-
+  
   render() {
-    const { selectedOption, subcategoryOptions, newOption } = this.state;
+     const isSubCategoryNameEmpty = this.state.subCategoryName.trim() === '';
 
     return (
       <div>
         <label>
-          Subcategory Option:
-          <select value={selectedOption} onChange={this.handleOptionChange}>
-            <option value="">Select an option</option>
-
+          Category:
+          <select
+            value={this.state.selectedCategory}
+            onChange={(e) => this.setState({ selectedCategory: e.target.value })}
+          >
+            <option value="">Select a category</option>
+            {this.state.categoryOptions.map((categoryName) => (
+              <option key={categoryName} value={categoryName}>
+                {categoryName}
+              </option>
+            ))}
           </select>
-
-          <select value={selectedOption} onChange={this.handleOptionChange}>
-            <option value="">Vehicle company</option>
-            <option value="TyreSize">TyreSize</option>
-          </select>
-
-          <select value={selectedOption} onChange={this.handleOptionChange}>
-            <option value="">TyreSize</option>
-            <option value="vsgcs">TyreSize</option>
-          </select>
-
         </label>
-        {selectedOption === 'Add an option' && (
-          <div>
+        {/* Render other subcategory fields here */}
+{/* 888888888888888888888888888888888888888888888888888888888888 */}
+
+          <br />
+        <div style={{ backgroundColor: 'lightblue', padding: '10px' }}>
             <label>
-              New Option:
-              <input type="text" value={newOption} onChange={this.handleAddOption} />
+            SubCategory Name<span style={{ color: 'red' }}>*</span>:
+              <input
+                type="text"
+                value={this.state.subCategoryName}
+                onChange={this.handleSubCategoryNameChange}
+                placeholder="Enter subcategory name"
+                required
+              />
             </label>
+            <div>
+              <label>
+                SubCategory Description:
+                <textarea
+                  value={this.state.subCategoryDescription}
+                  onChange={this.handleSubCategoryDescriptionChange}
+                  placeholder="Enter subcategory Description*"
+
+                />
+              </label>
+            </div>
+            <button onClick={this.handleAddSubCategory} disabled={isSubCategoryNameEmpty} 
+            style={{marginRight: '0.5cm', backgroundColor: 'red', color: 'white' }}>Add</button>
+
+            <button onClick={this.handleCloseButtonClick} 
+            style={{ backgroundColor: 'red', color: 'white' }}>Close</button>
+
+            <p className="next-subcategory">
+             <Link to="/categories">Back</Link>
+          </p>
           </div>
-        )}
-        <button onClick={this.handleAddSubcategory}>Add Subcategory</button>
+
+                  {/* Tyre Company Component */}
+        
+
+
       </div>
+
+      
+      
     );
   }
 }

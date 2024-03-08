@@ -152,7 +152,22 @@ export default class HomePage extends Component {
                                             </ul>
                                         </li>
                                         <li><a href="#"> About </a></li>
-                                        <li><a href="/categories"> Categories</a></li>
+                                        <li><a href="/categories"> Categories <i class="fa fa-angle-down"></i></a>
+                                            <ul class="submenu">
+                                                <li><a href="/CategoryList">CategoryList</a></li>
+                                                <li><a href="#">blog no sidebar</a></li>
+                                                <li><a href="#">blog right sidebar</a></li>
+                                                <li><a href="#">blog details 1</a></li>
+                                                <li><a href="#">blog details 2</a></li>
+                                                <li><a href="#">blog details 3</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="/categories"> Masters <i class="fa fa-angle-down"></i></a>
+                                            <ul class="submenu">
+                                                <li><a href="/add-brand">Add Brand</a></li>
+                                                <li><a href="/add-product">Add Product</a></li>
+                                            </ul>
+                                        </li>
                                     </ul>
                                 </nav>
                             </div>
@@ -191,7 +206,7 @@ export default class HomePage extends Component {
                                         <ul>
                                             <li class="single-shopping-cart">
                                                 <div class="shopping-cart-img">
-                                                    <a href="#"><img alt="" src="assets/img/cart/cart-1.webp"/></a>
+                                                    <a href="#"><img alt="" src="assets/img/cart/Ceat5.webp"/></a>
                                                 </div>
                                                 <div class="shopping-cart-title">
                                                     <h4><a href="#">T- Shart & Jeans </a></h4>
@@ -204,7 +219,7 @@ export default class HomePage extends Component {
                                             </li>
                                             <li class="single-shopping-cart">
                                                 <div class="shopping-cart-img">
-                                                    <a href="#"><img alt="" src="assets/img/cart/cart-2.webp"/></a>
+                                                    <a href="#"><img alt="" src="assets/img/cart/Ceat5.webp"/></a>
                                                 </div>
                                                 <div class="shopping-cart-title">
                                                     <h4><a href="#">T- Shart & Jeans </a></h4>
@@ -235,7 +250,7 @@ export default class HomePage extends Component {
                                 <ul class="menu-overflow">
                                     <li><a href="#">HOME</a>
                                         <ul>
-                                            <li><a href="#">Demo Group 01</a>
+                                            <li><a href="#">Demo Group 011</a>
                                                 <ul>
                                                     <li><a href="#">Home 1 – Fashion</a></li>
                                                     <li><a href="#">Home 2 – Fashion</a></li>
@@ -322,8 +337,8 @@ export default class HomePage extends Component {
                             <div class="row">
                                 <div class="col-xl-6 col-lg-6 col-md-6 col-12 col-sm-6">
                                     <div class="slider-content slider-animated-1">
-                                        <h3 class="animated">Smart Products</h3>
-                                        <h1 class="animated">Summer Offer <br />2024 Collection</h1>
+                                        <h3 class="animated"> Tubeless Tyre</h3>
+                                        <h1 class="animated"> Choose Best Tyre Offer <br />2024 Collection</h1>
                                         <div class="slider-btn btn-hover">
                                             <a class="animated" href="#">SHOP NOW</a>
                                         </div>
@@ -331,7 +346,9 @@ export default class HomePage extends Component {
                                 </div>
                                 <div class="col-xl-6 col-lg-6 col-md-6 col-12 col-sm-6">
                                     <div class="slider-single-img slider-animated-1">
-                                        <img class="animated" src="assets/img/slider/single-slide-1.webp" alt=""/>
+                                    <img class="animated" src="assets/img/slider/Ceat.webp" alt=""/>        
+
+                                        <img class="animated" src="assets/img/slider/Ceat2.webp" alt=""/>
                                     </div>
                                 </div>
                             </div>
@@ -342,8 +359,8 @@ export default class HomePage extends Component {
                             <div class="row">
                                 <div class="col-xl-6 col-lg-6 col-md-6 col-12 col-sm-6">
                                     <div class="slider-content slider-animated-1">
-                                        <h3 class="animated">Smart Products</h3>
-                                        <h1 class="animated">Summer Offer <br />2024 Collection</h1>
+                                        <h3 class="animated"> All Type of Variants</h3>
+                                        <h1 class="animated">  Best Services  <br />ALL TIME</h1>
                                         <div class="slider-btn btn-hover">
                                             <a class="animated" href="#">SHOP NOW</a>
                                         </div>
@@ -351,7 +368,7 @@ export default class HomePage extends Component {
                                 </div>
                                 <div class="col-xl-6 col-lg-6 col-md-6 col-12 col-sm-6">
                                     <div class="slider-single-img slider-animated-1">
-                                        <img class="animated" src="assets/img/slider/single-slide-hm1-2.webp" alt=""/>
+                                        <img class="animated" src="assets/img/slider/Ceat4.png" alt=""/>
                                     </div>
                                 </div>
                             </div>
@@ -432,8 +449,8 @@ export default class HomePage extends Component {
                                     <div class="product-wrap mb-25">
                                         <div class="product-img">
                                             <a href="#">
-                                                <img class="default-img" src="assets/img/product/pro-8.webp" alt=""/>
-                                                <img class="hover-img" src="assets/img/product/pro-6.webp" alt=""/>
+                                                <img class="default-img" src="assets/img/product/Ceat6.webp" alt=""/>
+                                                <img class="hover-img" src="assets/img/product/Ceat7.webp" alt=""/>
                                             </a>
                                             <span class="pink">-10%</span>
                                             <div class="product-action">
@@ -468,8 +485,8 @@ export default class HomePage extends Component {
                                     <div class="product-wrap mb-25">
                                         <div class="product-img">
                                             <a href="#">
-                                                <img class="default-img" src="assets/img/product/pro-7.webp" alt=""/>
-                                                <img class="hover-img" src="assets/img/product/pro-4-1.webp" alt=""/>
+                                                <img class="default-img" src="assets/img/product/Ceat6.webp" alt=""/>
+                                                <img class="hover-img" src="assets/img/product/Ceat8.webp" alt=""/>
                                             </a>
                                             <span class="purple">New</span>
                                             <div class="product-action">
@@ -503,8 +520,8 @@ export default class HomePage extends Component {
                                     <div class="product-wrap mb-25">
                                         <div class="product-img">
                                             <a href="#">
-                                                <img class="default-img" src="assets/img/product/pro-6.webp" alt=""/>
-                                                <img class="hover-img" src="assets/img/product/pro-6-1.webp" alt=""/>
+                                                <img class="default-img" src="assets/img/product/Ceat6.webp" alt=""/>
+                                                <img class="hover-img" src="assets/img/product/Ceat9.webp" alt=""/>
                                             </a>
                                             <span class="pink">-10%</span>
                                             <div class="product-action">
@@ -539,8 +556,8 @@ export default class HomePage extends Component {
                                     <div class="product-wrap mb-25">
                                         <div class="product-img">
                                             <a href="#">
-                                                <img class="default-img" src="assets/img/product/pro-5.webp" alt="" />
-                                                <img class="hover-img" src="assets/img/product/pro-5-1.webp" alt="" />
+                                                <img class="default-img" src="assets/img/product/Ceat10.webp" alt="" />
+                                                <img class="hover-img" src="assets/img/product/Ceat11.webp" alt="" />
                                             </a>
                                             <span class="purple">New</span>
                                             <div class="product-action">

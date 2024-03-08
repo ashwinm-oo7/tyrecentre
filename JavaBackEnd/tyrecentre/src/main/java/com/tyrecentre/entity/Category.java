@@ -8,12 +8,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "category")
 public class Category implements Serializable {
 
-//	@Id
-//	String categoryId;
+    @Id
+    private String id;
 	
 	String categoryName;
 	
 	String categoryDescription;
+	
+	public String getId() {
+		return id;
+	}
 
 	public String getCategoryName() {
 		return categoryName;

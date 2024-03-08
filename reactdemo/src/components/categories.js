@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import '../css/categories.css';
 import Modal from 'react-modal';
-import Subcategories from './subcategories';
+import { Link } from 'react-router-dom';
+
+// import Subcategories from './subcategories';
 
 class Categories extends Component {
   constructor(props) {
@@ -22,7 +24,7 @@ class Categories extends Component {
     this.handleCategoryNameChange = this.handleCategoryNameChange.bind(this);
     this.handleCategoryDescriptionChange = this.handleCategoryDescriptionChange.bind(this);
     this.handleAddCategory = this.handleAddCategory.bind(this);
-    this.handleAddSubcategory = this.handleAddSubcategory.bind(this);
+    // this.handleAddSubcategory = this.handleAddSubcategory.bind(this);
 
   }
 
@@ -38,9 +40,7 @@ class Categories extends Component {
     this.setState({ isOpen: true });
   }
 
-  handleCloseButtonClick() {
-    this.setState({ isOpen: false });
-  }
+  
 
   handleCategoryNameChange(event) {
     this.setState({ categoryName: event.target.value });
@@ -50,10 +50,10 @@ class Categories extends Component {
     this.setState({ categoryDescription: event.target.value });
 
   }
+
   handleCloseButtonClick() {
     this.setState({ modalIsOpen: false });
   }
-
   
 
   handleAddCategory =async(e) => {
@@ -98,11 +98,11 @@ class Categories extends Component {
       }
   }
 
-  handleAddSubcategory(subcategoryData) {
-    this.setState(prevState => ({
-      subcategories: [...prevState.subcategories, subcategoryData]
-    }));
-  }
+  // handleAddSubcategory(subcategoryData) {
+  //   this.setState(prevState => ({
+  //     subcategories: [...prevState.subcategories, subcategoryData]
+  //   }));
+  // }
 
 
 
@@ -122,7 +122,14 @@ class Categories extends Component {
 
     return (
       <div>
-        <button onClick={this.openModal} style={{ backgroundColor: 'lightblue' }}>Add Category</button>
+      <button onClick={this.openModal}>Add Category</button>
+        {/* <button onClick={this.openModal} style={{ backgroundColor: 'lightblue' }}>Add Category</button> */}
+        <p className="next-subcategory">
+             <Link to="/home">Back</Link>
+        </p>
+        <p className="next-subcategory">
+             <Link to="/subcategories">Next</Link>
+          </p>
 
         <Modal 
           isOpen={this.state.modalIsOpen}
@@ -159,22 +166,9 @@ class Categories extends Component {
             <button onClick={this.handleCloseButtonClick} 
             style={{ backgroundColor: 'red', color: 'white' }}>Close</button>
           </div>
-          <div>
-          <Subcategories 
-            initialCategoryName={this.state.categoryName} 
-            initialCategoryDescription={this.state.categoryDescription}
-            onAddSubcategory={this.handleAddSubcategory} 
-          />
-          </div>
+         
         </Modal>
-                {/* Display added subcategories */}
-                {this.state.subcategories.map((subcategory, index) => (
-          <div key={index}>
-            <p>Category Name: {subcategory.categoryName}</p>
-            <p>Description: {subcategory.categoryDescription}</p>
-            <p>Selected Option: {subcategory.selectedOption}</p>
-          </div>
-        ))}
+
 
       </div>
     );

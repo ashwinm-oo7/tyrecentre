@@ -1,3 +1,4 @@
+
 .categories-container {
     padding: 20px;
   }
@@ -47,3 +48,8 @@
     display: block;
   }
   
+  .next-subcategory {
+    font-weight: bold;
+    color: blue;
+    text-decoration: underline;
+}
