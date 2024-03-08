@@ -23,10 +23,10 @@ class AddProduct extends Component {
     this.state = {
       categoryOptions: [],
       subCategoryOptions: [],
-      selectedCategory: [],
-      selectedSubCategory: [],
+      selectedCategory: '',
+      selectedSubCategory: '',
       tyreCompanyOptions: [],
-      selectedBrand: [],
+      selectedBrand: '',
       productImages: [],
       productName: '',
       productPrice: 0,
@@ -145,9 +145,14 @@ uploadAllImages = () => {
     try {
         if (!productImages || productImages.length === 0) {
             // Display error message when there are no product images
-            toast.error('Please upload product images');
+            toast.warning('Please upload product images');
             return; // Exit the function early if there are no images
         }
+        if (!this.state.brandName  || this.state.brandName.length === 0) {
+          // Display error message when there are no product images
+          toast.warning('Please select brand !');
+          return; // Exit the function early if there are no images
+      }
 
 
       const response = await axios.post('http://localhost:8080/product/add', {
@@ -192,20 +197,7 @@ uploadAllImages = () => {
     this.setState({ activeTab: tabName });
   };
 
-  handleImageSelect = (index) => {
-    // Set the selected image index
-    const selectedImage = this.state.productImages[index];
-    this.props.onImageSelect(selectedImage);
 
-    this.setState({
-      imageIndex: index,
-      imageName: this.state.images[index].name,
-      imageSize: this.state.images[index].size,
-      imageType: this.state.images[index].type,
-      imageDescription: this.state.images[index].description,
-    });
-    console.log("Image selected: ", this.state);
-  };
 
   handleImageUpload = async (e,images) => {
     const files = e.target.files;
@@ -385,7 +377,7 @@ uploadAllImages = () => {
         {/* Display uploaded images */}
         <div className="image-preview">
           {this.state.productImages.map((image, index) => (
-            <div key={index} onClick={() => this.handleImageSelect(index)}>
+            <div key={index}>
             <img src={image.dataURL} alt={`Product Imagee ${index + 1}`} />
 
               <p >Names: {image.fileName}</p>
@@ -403,7 +395,7 @@ uploadAllImages = () => {
           ))}
           
         </div>
-        {/* <button onClick={this.uploadAllImages}>Upload </button> */}
+
       </div>
         </label>
 
