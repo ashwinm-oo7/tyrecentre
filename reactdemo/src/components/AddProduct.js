@@ -143,16 +143,26 @@ uploadAllImages = () => {
     const { selectedCategory, selectedSubCategory, selectedBrand,productName,productPrice,productQuantity
     ,skuCode,manufacturer,productDescription,productImages} = this.state;
     try {
+        if (!this.state.categoryName  || this.state.categoryName.length === 0) {
+          toast.warning('Please select brand !');
+          return;
+        }
+        if (!this.state.subCategoryName  || this.state.subCategoryName.length === 0) {
+          toast.warning('Please select brand !');
+          return;
+        }
+        if (!this.state.brandName  || this.state.brandName.length === 0) {
+          toast.warning('Please select brand !');
+          return;
+        }
         if (!productImages || productImages.length === 0) {
             // Display error message when there are no product images
             toast.warning('Please upload product images');
             return; // Exit the function early if there are no images
         }
-        if (!this.state.brandName  || this.state.brandName.length === 0) {
-          // Display error message when there are no product images
-          toast.warning('Please select brand !');
-          return; // Exit the function early if there are no images
-      }
+        
+
+        
 
 
       const response = await axios.post('http://localhost:8080/product/add', {
