@@ -3,6 +3,9 @@ package com.tyrecentre.entity;
 import java.io.Serializable;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.annotation.Id;
@@ -38,13 +41,15 @@ public class Customer implements Serializable {
 	/**
 	 * 
 	 */
-	String firstName;
-	String lastName;
-	String phoneNumber;
-	String email;
-	Integer pinCode;
-	Integer age;
-	String password;
+	private String firstName;
+	private String lastName;
+	private String phoneNumber;
+	private String email;
+	private Integer pinCode;
+	private Integer age;
+	private boolean isAdmin = false;
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private String password;
     public String getEmail() {
         return email;
     }
@@ -59,6 +64,12 @@ public class Customer implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+	public void setAdmin(boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
 
 
 }

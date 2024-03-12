@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from 'axios';
 import '../css/ProductImage.css';
+import { FaTimes } from 'react-icons/fa'; // Import pencil icon from react-icons library
+import Multiselect from 'multiselect-react-dropdown';
 
 
 const fileToBase64 = (file) => {
@@ -35,13 +37,68 @@ class AddProduct extends Component {
       manufacturer: '',	
       productDescription: '',
       activeTab: 'general', // Add state for active tab
-      
+      productIdToUpdate:null,
+      defaultDisabled: false,
+      options: [],
+      categoryForDropdownSearch: '',
+      disabled: false,
+      vehicleBrandModels: [],
+      tyreSize: ''
     };
-
+    this.state.productIdToUpdate = ''; // logic to get data from URL
+    const urlSearchString = window.location.search;
+    const params = new URLSearchParams(urlSearchString);
+    this.state.productIdToUpdate = params.get('id');
+    console.log('ID FROM URL : ' , this.state.productIdToUpdate );
+    if(this.state.productIdToUpdate){
+      this.fetchProductByProductId(this.state.productIdToUpdate);
+    }
   }
-
+  
+  fetchProductByProductId= async (productIdToUpdate) =>  {
+      const response = await fetch(`http://localhost:8080/product/getProductById/${productIdToUpdate}`, {
+        method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }); 
+        const productData = await response.json();
+        console.log('productData : ' , productData);
+        if (productData.categoryName === "Two Wheeler") {
+          console.log(' calling consructoer two wheeler');
+          await this.fetchMotoBrandModels(productData.categoryName);
+        } 
+         if (productData.categoryName === 'Four Wheeler') {
+          await this.fetchCarBrandModels(productData.categoryName);
+        }
+        setTimeout(() => {
+          this.setState({
+              defaultDisabled: true,
+              selectedCategory: productData.categoryName,
+              selectedSubCategory: productData.subCategoryName,
+              selectedBrand:productData.brandName,
+              productName: productData.productName,
+              productPrice: productData.productPrice,
+              productQuantity: productData.productQuantity,
+              skuCode: productData.skuCode,
+              manufacturer: productData.manufacturer,
+              productDescription: productData.productDescription,
+              productImages: productData.productImages,
+              selectedValue: productData.vehicleBrandModels,
+              tyreSize: productData.tyreSize
+              
+          });
+          if(productData.categoryName){
+            this.fetchSubCategoryOptions(productData.categoryName);
+          }
+          if(productData.subCategoryName){
+            this.fetchTyreCompanyOptions(productData.subCategoryName);
+          }
+        }, 100);
+  }
+  
   componentDidMount() {
-    this.fetchCategoryOptions();
+    this.fetchCategoryOptions();    
   }
 
   fetchCategoryOptions = async () => {
@@ -79,13 +136,61 @@ class AddProduct extends Component {
     }
   };
   
+  fetchMotoBrandModels= async () =>{
+    try {
+      const response = await axios.get('http://localhost:8080/motoBrandModels/getMotoBrandModels');
+      const brandModels = await response;
+      console.log('MOTO brandModels Response:', brandModels.data);
+      this.setState({ options:  brandModels.data});
+      this.setState({ categoryForDropdownSearch:  brandModels.data[0].categoryName});
+      console.log('MOTO categoryForDropdownSearch:', brandModels.data[0].categoryName);
+
+    } catch (error) {
+      console.error('Error fetching category options:', error);
+    }
+  }
+
+  fetchCarBrandModels= async () =>{
+    try {
+      const response = await axios.get('http://localhost:8080/carBrandModels/getCarBrandModels');
+      const brandModels = await response;
+      console.log('car brandModels Response:', brandModels.data);
+      this.setState({ options:  brandModels.data});
+      this.setState({ categoryForDropdownSearch:  brandModels.data[0].categoryName});
+      console.log('CAR categoryForDropdownSearch:', brandModels.data[0].categoryName);
+
+    } catch (error) {
+      console.error('Error fetching category options:', error);
+    }
+  }
+ 
   handleCategoryChange = async (e) => {
       const selectedCategory = e.target.value;
 
+    // await this.fetchMotoBrandModels();
+
+    // await this.fetchCarBrandModels();
+
+    if (selectedCategory === "Two Wheeler") {
+      await this.fetchMotoBrandModels(selectedCategory);
+    } 
+     if (selectedCategory === 'Four Wheeler') {
+      await this.fetchCarBrandModels(selectedCategory);
+    }
+  
+
+    setTimeout(() => {
+      console.log('Category Selected:', selectedCategory);
+      console.log('Category drop : ', this.state.categoryForDropdownSearch);
+      if(selectedCategory !== this.state.categoryForDropdownSearch){
+        this.setState({ options:  []});
+      }
+    }, 100);
+    
     await this.setState({ selectedCategory });
 
      this.fetchSubCategoryOptions(selectedCategory); 
-    // Pass the selected category to fetch subcategories
+
  };
 // *************************GET TYRE Company*********************************************************************
 fetchTyreCompanyOptions = async (selectedSubCategory) => {
@@ -139,20 +244,22 @@ uploadAllImages = () => {
     this.uploadBase64Image(image.dataURL, `Image_${index + 1}.png`);
   });
 };
+
   handleAddProduct = async () => {
     const { selectedCategory, selectedSubCategory, selectedBrand,productName,productPrice,productQuantity
     ,skuCode,manufacturer,productDescription,productImages} = this.state;
     try {
-        if (!this.state.categoryName  || this.state.categoryName.length === 0) {
-          toast.warning('Please select brand !');
+        if (!this.state.selectedCategory  || this.state.selectedCategory.length === 0) {
+          console.log('category',this.state.categoryName);
+          toast.warning('Please select Categoty !');
           return;
         }
-        if (!this.state.subCategoryName  || this.state.subCategoryName.length === 0) {
-          toast.warning('Please select brand !');
+        if (!this.state.selectedSubCategory  || this.state.selectedSubCategory.length === 0) {
+          toast.warning('Please select SubCategoty !');
           return;
         }
-        if (!this.state.brandName  || this.state.brandName.length === 0) {
-          toast.warning('Please select brand !');
+        if (!this.state.selectedBrand  || this.state.selectedBrand.length === 0) {
+          toast.warning('Please select Brand !');
           return;
         }
         if (!productImages || productImages.length === 0) {
@@ -161,9 +268,6 @@ uploadAllImages = () => {
             return; // Exit the function early if there are no images
         }
         
-
-        
-
 
       const response = await axios.post('http://localhost:8080/product/add', {
         categoryName: selectedCategory,
@@ -175,7 +279,10 @@ uploadAllImages = () => {
         skuCode: skuCode,
         manufacturer: manufacturer,
         productDescription:productDescription,
-        productImages: this.state.productImages
+        productImages: this.state.productImages,
+        id: this.state.productIdToUpdate,
+        vehicleBrandModels: this.state.vehicleBrandModels,
+        tyreSize: this.state.tyreSize
       });
 
       this.setState({
@@ -202,7 +309,9 @@ uploadAllImages = () => {
       console.error('Error adding product:', error);
       toast.error('Error adding product');
     }
+    window.location.reload();
   };
+
   handleTabChange = (tabName) => {
     this.setState({ activeTab: tabName });
   };
@@ -217,6 +326,12 @@ uploadAllImages = () => {
       alert('You can upload a maximum of 5 images.');
       return;
     }
+
+    if (this.state.productImages.length + files.length > 5) {
+      alert('You can only upload a maximum of 5 images.');
+      return;
+    }
+  
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -258,7 +373,26 @@ uploadAllImages = () => {
   };
 
 
-  
+  handleDeleteImage = (index) => {
+    // Make a copy of the productImages array
+    const updatedImages = [...this.state.productImages];
+    // Remove the image at the specified index
+    updatedImages.splice(index, 1);
+    // Update the state with the modified array
+    this.setState({ productImages: updatedImages });
+  };
+  onSelect = (selectedList, selectedItem) => {
+    console.log(selectedList);
+    this.setState({ vehicleBrandModels: selectedList});
+}
+
+
+
+  onRemove(selectedList, removedItem) {
+    this.setState({ vehicleBrandModels: selectedList});
+    console.log('remove : ', selectedList);
+  }
+
   render() {
     const isProductNameEmpty = this.state.productName.trim() === '';
     
@@ -275,9 +409,10 @@ uploadAllImages = () => {
           <div>
             <label>
               Category:
-              <select
+              <select id='categorySelectId'
                 value={this.state.selectedCategory}
                 onChange={this.handleCategoryChange}
+                disabled={this.state.defaultDisabled ? true : null}
               >
                 <option value="">Select a category</option>
                 {this.state.categoryOptions.map((categoryName) => (
@@ -290,9 +425,10 @@ uploadAllImages = () => {
 
             <label>
               Subcategory:
-              <select
+              <select id='subCategorySelectId'
                 value={this.state.selectedSubCategory}
                 onChange={this.handleSubCategoryChange}
+                disabled={this.state.defaultDisabled ? true : null}
               >
                 <option value="">Select a subcategory</option>
                 {this.state.subCategoryOptions.map((subcategoryName) => (
@@ -305,8 +441,9 @@ uploadAllImages = () => {
 
             <label>
               Tyre Company:
-              <select
+              <select id='brandSelectId'
                 value={this.state.selectedBrand}
+                disabled={this.state.defaultDisabled ? true : null}
                 onChange={(e) => this.setState({ selectedBrand: e.target.value })}
               >
                 <option value="">Select a Brand</option>
@@ -324,10 +461,33 @@ uploadAllImages = () => {
             type="text"
             value={this.state.productName}
             onChange={(e) => this.setState({ productName: e.target.value })}
-            placeholder="Enter product name"
+            placeholder="Enter Product Name"
             required
           />
         </label>
+        <label>
+          Tyre Size<span style={{ color: 'red' }}>*</span>:
+          <input
+            type="text"
+            value={this.state.tyreSize}
+            onChange={(e) => this.setState({ tyreSize: e.target.value })}
+            placeholder="Enter Tyre Size"
+            required
+          />
+        </label>
+        <label>
+              Vehicles :
+              <Multiselect
+                options={this.state.options} // Options to display in the dropdown
+                selectedValues={this.state.selectedValue} // Preselected value to persist in dropdown
+                onSelect={this.onSelect} // Function will trigger on select event
+                onRemove={this.onRemove} // Function will trigger on remove event
+                displayValue="name" // Property name to display in the dropdown options
+                disable={this.state.disabled}
+                selectionLimit={10} // Set the selection limit to 3
+
+                />
+            </label>
         <label>
           Product Price<span style={{ color: 'red' }}>*</span>:
           <input
@@ -381,13 +541,14 @@ uploadAllImages = () => {
         <label>
           <div>
         {/* Input field for image upload */}
+        <div>
         Upload Images:
         <input type="file" multiple onChangeCapture={this.handleImageUpload} />
-
+        </div>
         {/* Display uploaded images */}
         <div className="image-preview">
           {this.state.productImages.map((image, index) => (
-            <div key={index}>
+            <div className="image-preview-item" key={index}>
             <img src={image.dataURL} alt={`Product Imagee ${index + 1}`} />
 
               <p >Names: {image.fileName}</p>
@@ -396,8 +557,9 @@ uploadAllImages = () => {
               
               <p >Size: {image.size} KB</p>
               
-              <p > Type: {image.type}</p>
+              {/* <p > Type: {image.type}</p> */}
 
+              <FaTimes className="delete-icon" onClick={() => this.handleDeleteImage(index)} />
 
 
             </div>
@@ -410,7 +572,7 @@ uploadAllImages = () => {
         </label>
 
         <button onClick={this.handleAddProduct} disabled={isProductNameEmpty}>
-          Add Product
+          { this.state.productIdToUpdate ? 'Update' : 'Add Product'}
         </button>
 
         <Link to="/categories">Back</Link>

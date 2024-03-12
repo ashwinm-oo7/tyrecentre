@@ -1,11 +1,40 @@
-import React, { Component }  from 'react';
+import React, { Component ,useState}  from 'react';
 
 export default class HomePage extends Component {
-    
- 
-  render() {
-   
-    return (
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoggedIn: false
+        };
+    }
+
+    componentDidMount() {
+        // Fetch authentication status from Spring Boot backend
+        fetch('/api/auth/status', {
+            method: 'GET',
+            credentials: 'include' // Include credentials for session handling
+        })
+        .then(response => {
+            if (response.ok) {
+                this.setState({ isLoggedIn: true }); // User is authenticated
+            } else {
+                this.setState({ isLoggedIn: false }); // User is not authenticated
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching authentication status:', error);
+        });
+    }
+
+    logout(){
+        localStorage.clear();
+        window.location = 'http://localhost:3000/login';
+    }
+    render() {
+        
+        const { isLoggedIn } = this.state;
+
+        return (
      
       <div className="">
         <header class="header-area header-padding-1 sticky-bar header-res-padding clearfix">
@@ -133,6 +162,7 @@ export default class HomePage extends Component {
                                             <ul class="submenu">
                                                 <li><p><a href="/login">login / register </a></p></li>
                                                 <li><a href="/about">about us</a></li>
+
                                                 <li><a href="#">cart page</a></li>
                                                 <li><a href="#">checkout </a></li>
                                                 <li><a href="#">wishlist </a></li>
@@ -162,12 +192,15 @@ export default class HomePage extends Component {
                                                 <li><a href="#">blog details 3</a></li>
                                             </ul>
                                         </li>
-                                        <li><a href="/categories"> Masters <i class="fa fa-angle-down"></i></a>
+                                        {  localStorage.getItem('isAdmin') === 'true' ? (
+
+                                        <li><a href="#"> Masters <i class="fa fa-angle-down"></i></a>
                                             <ul class="submenu">
                                                 <li><a href="/add-brand">Add Brand</a></li>
                                                 <li><a href="/add-product">Add Product</a></li>
                                             </ul>
                                         </li>
+                                        ) : ( <></> )}
                                     </ul>
                                 </nav>
                             </div>
@@ -183,17 +216,33 @@ export default class HomePage extends Component {
                                         </form>
                                     </div> 
                                 </div>
+                                {localStorage.getItem('userEmail') ? (
+
                                 <div class="same-style account-satting">
                                     <a class="account-satting-active" href="#"><i class="pe-7s-user-female"></i></a>
                                     <div class="account-dropdown">
                                         <ul>
-                                            <li><a href="/login">Login</a></li>
+                                            <li><a onClick={() => this.logout()} href="/login">{localStorage.getItem('userEmail') ? 'Logout' : 'Login'} </a></li>
+                                            
                                             <li><a href="/sign-up">Register</a></li>
                                             <li><a href="#">Wishlist  </a></li>
                                             <li><a href="#">my account</a></li>
                                         </ul>
                                     </div>
                                 </div>
+                                ):(                          
+                                    <div class="same-style account-satting">
+                                    <a class="account-satting-active" href="#"><i class="pe-7s-user-female"></i></a>
+                                    <div class="account-dropdown">
+                                        <ul>
+                                            <li><a onClick={() => this.logout()} href="/login">{localStorage.getItem('userEmail') ? 'Logout' : 'Login'} </a></li>
+                                            
+                                            <li><a href="/sign-up">Register</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                )}
+                                
                                 <div class="same-style header-wishlist">
                                     <a href="#"><i class="pe-7s-like"></i></a>
                                 </div>

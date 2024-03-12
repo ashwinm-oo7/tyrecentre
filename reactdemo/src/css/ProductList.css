@@ -1,0 +1,38 @@
+.product-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .product-list th, .product-list td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd; /* Add right border for columns */
+
+  }
+  
+  .product-list th {
+    background-color: #134274; /* Blue background color */
+    color: #fff; /* White text color */
+    }
+  
+  .product-list img {
+    max-width: 50px;
+    max-height: 50px;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .product-list tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Very light background color */
+  }
+  
+  .product-list tbody tr:hover {
+    background-color: #f2f2f2; /* Lighter background color on hover */
+  }  
+
+  /* Remove right border for last column */
+.product-list th:last-child, .product-list td:last-child {
+    border-right: none;
+}

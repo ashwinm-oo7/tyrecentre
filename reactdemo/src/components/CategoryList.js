@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../css/CategoryList.css'; // Import CSS file for styling
 import PopupModal from './PopupModal'; // Import the popup modal component
-import ConfirmationModal from './ConfirmationModal'; // Import the confirmation modal component
 
 import { Link } from 'react-router-dom';
 

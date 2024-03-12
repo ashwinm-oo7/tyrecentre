@@ -16,6 +16,7 @@ import AddBrand from './components/AddBrand';
 
 import { ToastContainer } from 'react-toastify';
 import AddProduct from './components/AddProduct';
+import ProductList from './components/ProductList';
 
 
 
@@ -40,6 +41,7 @@ class Home extends React.Component {
             <Route path="productcreation" element={<ProductCreation />} />
             <Route path="add-brand" element={<AddBrand />} />
             <Route path="add-product" element={<AddProduct />} />
+            <Route path="product-list" element={<ProductList />} />
 
         </Routes>
         <ToastContainer/>

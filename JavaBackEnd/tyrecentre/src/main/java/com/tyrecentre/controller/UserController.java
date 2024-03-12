@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,10 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tyrecentre.entity.Customer;
 import com.tyrecentre.repo.CustomerRepo;
+import com.tyrecentre.utility.EncryptionDecryption;
 
 @RestController
-@RequestMapping("/tyrecentre")
-class TyreCentreController {
+@RequestMapping("/user")
+class UserController {
 
     @Autowired
     private CustomerRepo customerRepo;
@@ -25,6 +25,10 @@ class TyreCentreController {
         System.out.println("API Called from REACT JS");
 
         try {
+        	System.out.println(entity.getPassword());
+        	String encPwd = EncryptionDecryption.encrypt(entity.getPassword());
+        	System.out.println(encPwd);
+        	entity.setPassword(encPwd);
             Customer savedCustomer = customerRepo.save(entity);
             return new ResponseEntity<>(savedCustomer, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -41,10 +45,13 @@ class TyreCentreController {
         try {
             // Find customer by email
             Customer existingCustomer = customerRepo.findByEmail(entity.getEmail());
-
+            
+            String decPwd = EncryptionDecryption.decrypt(existingCustomer.getPassword());
+            System.out.println(decPwd);
+            System.out.println(existingCustomer.getPassword());
             // Check if customer exists and password matches
-            if (existingCustomer != null && existingCustomer.getPassword().equals(entity.getPassword())) {
-                // Login successful
+            if (existingCustomer != null && decPwd.equals(entity.getPassword())) {
+                // Login successful`
                 return new ResponseEntity<>(existingCustomer, HttpStatus.OK);
             } else {
                 // Login failed due to invalid email or password

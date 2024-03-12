@@ -2,6 +2,7 @@
   import { Link } from 'react-router-dom';
 
 import tyreLogo from '../icons/tyrelogo.png';
+import { toast } from 'react-toastify';
 
 
   export default class Login extends Component {
@@ -220,7 +221,7 @@ import tyreLogo from '../icons/tyrelogo.png';
       //http://localhost:8080/tyrecentre/save
 
       try {
-        const response = await fetch('http://localhost:8080/tyrecentre/login', {
+        const response = await fetch('http://localhost:8080/user/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -232,19 +233,21 @@ import tyreLogo from '../icons/tyrelogo.png';
           body: JSON.stringify(this.state),
         });
 
+        const loginData = await response.json();
         if (response.ok) {
-          console.log(response);
+          console.log(loginData);
           console.log('User LOGIN successfully');
           window.location = 'http://localhost:3000/home';
-          // this.props.history.push('/tyreProducts/tyreSample');
-          // alert('User LOGIN successfully');
-          
+          localStorage.setItem('userEmail', loginData.email);
+          localStorage.setItem('isAdmin', loginData.admin);
 
-          // Redirect or perform any other actions after successful registration
+          toast.success('Logged in successfully');
         } else {
+          toast.warning('Incorrect Credentials');
           console.error('Failed to LOGIN user');
         }
       } catch (error) {
+        toast.warning('Something went wrong');
         console.error('Error during user LOGIN:', error);
       }
     };

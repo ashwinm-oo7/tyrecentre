@@ -86,7 +86,7 @@ export default class SignUp extends Component {
     //http://localhost:8080/tyrecentre/save
 
     try {
-      const response = await fetch('http://localhost:8080/tyrecentre/signup', {
+      const response = await fetch('http://localhost:8080/user/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -2,14 +2,27 @@
   display: flex;
   flex-wrap: wrap;
 }
-
-.image-preview img {
-  width: 100px; /* Adjust the width as per your preference */
-  height: 100px; /* Adjust the height as per your preference */
-  margin: 5px; /* Adjust the margin between images as per your preference */
+.image-preview-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
+.image-preview img {
+  width: 70px; /* Adjust the width as per your preference */
+  height: 70px; /* Adjust the height as per your preference */
+  margin: 5px; /* Adjust the margin between images as per your preference */
+  position: relative; /* Add relative positioning */
+  margin-right: 10px; /* Add margin between image and details */
 
+}
+
+.delete-icon {
+  position: relative;
+  top: -30px; /* Adjust top position as needed */
+  right: 500px; /* Adjust right position as needed */
+  cursor: pointer;
+}
 
 
 .add-product-container {

@@ -112,6 +112,8 @@ class AddBrand extends Component {
 
   render() {
     const isProductNameEmpty = this.state.productName.trim() === '';
+
+
     return (
         <div className="add-product-container">
         <div className="tab-buttons">

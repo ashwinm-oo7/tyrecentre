@@ -16,67 +16,42 @@ import jakarta.persistence.TemporalType;
 @Document(collection = "product") 
 public class Product implements Serializable {
 
-    /**
+	/**
 	 * 
 	 */
-    private List<ProductImages> productImages;
+
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-    private String id;
+	private String id;
 
-    private String categoryName; // Name of the category
-    
-    private String subCategoryName; // Name of the subcategory
-    
-    private String brandName;
-    private String productName;
-    private Double productPrice;
-    private Integer productQuantity;
-    private String skuCode;
-    private String manufacturer;
-    private String productDescription;
-    private String tyreNumber;
-    private String specifications;
-    
-    private String imageName;
-    private Double imageSize;
-    private String imageType;
-    private String imageDescription;
+	private String categoryName; // Name of the category
 
-    
-    public String getImageName() {
-		return imageName;
+	private String subCategoryName; // Name of the subcategory
+
+	private String brandName;
+	private String productName;
+	private Double productPrice;
+	private Integer productQuantity;
+	private String skuCode;
+	private String manufacturer;
+	private String productDescription;
+	private String tyreNumber;
+	private String tyreSize;
+	public String getTyreSize() {
+		return tyreSize;
 	}
 
-	public void setImageName(String imageName) {
-		this.imageName = imageName;
+	public void setTyreSize(String tyreSize) {
+		this.tyreSize = tyreSize;
 	}
 
-	public Double getImageSize() {
-		return imageSize;
-	}
+	private String specifications;
 
-	public void setImageSize(Double imageSize) {
-		this.imageSize = imageSize;
-	}
+	private List<ProductImages> productImages;
+	private List<ValueObjectDTO> vehicleBrandModels;
 
-	public String getImageType() {
-		return imageType;
-	}
-
-	public void setImageType(String imageType) {
-		this.imageType = imageType;
-	}
-
-	public String getImageDescription() {
-		return imageDescription;
-	}
-
-	public void setImageDescription(String imageDescription) {
-		this.imageDescription = imageDescription;
-	}
 
 	public String getTyreNumber() {
 		return tyreNumber;
@@ -95,14 +70,14 @@ public class Product implements Serializable {
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
-    @CreatedDate
-    private Date createdDate;
-    
-    @Temporal(TemporalType.TIMESTAMP)
-    @LastModifiedDate
-    
-    
-    private Date lastModifiedDate;
+	@CreatedDate
+	private Date createdDate;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@LastModifiedDate
+
+
+	private Date lastModifiedDate;
 
 	public String getId() {
 		return id;
@@ -184,7 +159,7 @@ public class Product implements Serializable {
 	public void setProductDescription(String productDescription) {
 		this.productDescription = productDescription;
 	} 
-	
+
 	public Date getCreatedDate() {
 		return createdDate;
 	}
@@ -207,6 +182,14 @@ public class Product implements Serializable {
 
 	public void setProductImages(List<ProductImages> productImages) {
 		this.productImages = productImages;
+	}
+
+	public List<ValueObjectDTO> getVehicleBrandModels() {
+		return vehicleBrandModels;
+	}
+
+	public void setVehicleBrandModels(List<ValueObjectDTO> vehicleBrandModels) {
+		this.vehicleBrandModels = vehicleBrandModels;
 	}
 
 
