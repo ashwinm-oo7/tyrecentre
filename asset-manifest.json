@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/tyrecentre/static/css/main.d4a1ef2e.css",
-    "main.js": "/tyrecentre/static/js/main.cb5a19d4.js",
-    "static/js/453.10143ad0.chunk.js": "/tyrecentre/static/js/453.10143ad0.chunk.js",
-    "static/media/tyrelogo.png": "/tyrecentre/static/media/tyrelogo.6bff5a082a6d5f99ecee.png",
-    "index.html": "/tyrecentre/index.html",
-    "main.d4a1ef2e.css.map": "/tyrecentre/static/css/main.d4a1ef2e.css.map",
-    "main.cb5a19d4.js.map": "/tyrecentre/static/js/main.cb5a19d4.js.map",
-    "453.10143ad0.chunk.js.map": "/tyrecentre/static/js/453.10143ad0.chunk.js.map"
+    "main.css": "/tyrecentre/index.html/static/css/main.d4a1ef2e.css",
+    "main.js": "/tyrecentre/index.html/static/js/main.bde555c8.js",
+    "static/js/453.10143ad0.chunk.js": "/tyrecentre/index.html/static/js/453.10143ad0.chunk.js",
+    "static/media/tyrelogo.png": "/tyrecentre/index.html/static/media/tyrelogo.6bff5a082a6d5f99ecee.png",
+    "index.html": "/tyrecentre/index.html/index.html",
+    "main.d4a1ef2e.css.map": "/tyrecentre/index.html/static/css/main.d4a1ef2e.css.map",
+    "main.bde555c8.js.map": "/tyrecentre/index.html/static/js/main.bde555c8.js.map",
+    "453.10143ad0.chunk.js.map": "/tyrecentre/index.html/static/js/453.10143ad0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d4a1ef2e.css",
-    "static/js/main.cb5a19d4.js"
+    "static/js/main.bde555c8.js"
   ]
 }
