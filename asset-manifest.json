@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/tyrecentre/static/css/main.d4a1ef2e.css",
-    "main.js": "/tyrecentre/static/js/main.321fa648.js",
+    "main.js": "/tyrecentre/static/js/main.c7bc8609.js",
     "static/js/453.10143ad0.chunk.js": "/tyrecentre/static/js/453.10143ad0.chunk.js",
     "static/media/tyrelogo.png": "/tyrecentre/static/media/tyrelogo.6bff5a082a6d5f99ecee.png",
     "index.html": "/tyrecentre/index.html",
     "main.d4a1ef2e.css.map": "/tyrecentre/static/css/main.d4a1ef2e.css.map",
-    "main.321fa648.js.map": "/tyrecentre/static/js/main.321fa648.js.map",
+    "main.c7bc8609.js.map": "/tyrecentre/static/js/main.c7bc8609.js.map",
     "453.10143ad0.chunk.js.map": "/tyrecentre/static/js/453.10143ad0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.d4a1ef2e.css",
-    "static/js/main.321fa648.js"
+    "static/js/main.c7bc8609.js"
   ]
 }
