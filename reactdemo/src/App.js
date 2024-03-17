@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Routes, Route } from "react-router-dom";
+import { HashRouter, Route } from "react-router-dom";
 import Login from "./components/login";
 import SignUp from "./components/signup";
 import HomePage from "./components/HomePage";
@@ -22,7 +22,7 @@ class Home extends React.Component {
   render() {
     return (
       <div className="app">
-        <Routes>
+        <HashRouter>
           <Route path="/" element={<HomePage />} />
           <Route path="login" element={<Login />} />
           <Route path="sign-up" element={<SignUp />} />
@@ -37,7 +37,7 @@ class Home extends React.Component {
           <Route path="product-list" element={<ProductList />} />
           <Route path="puncture-repair" element={<PunctureRepair />} />
           <Route path="puncture-repair-list" element={<PunctureRepairList />} />
-        </Routes>
+        </HashRouter>
         <ToastContainer />
       </div>
     );
