@@ -95,7 +95,8 @@ export default class HomePage extends Component {
 
   logout() {
     localStorage.clear();
-    window.location = "http://localhost:3000/login";
+    // window.location = "http://localhost:3000/tyrecentre/#/login";
+    window.location = "https://ashwinm-oo7.github.io/tyrecentre/#/login";
   }
   handleAddToCart = (product) => {
     const updatedCart = [...this.state.cart, product];
@@ -310,7 +311,9 @@ export default class HomePage extends Component {
                         <ul class="submenu">
                           <li>
                             <p>
-                              <a href="/login">login / register </a>
+                              <a href="/tyrecentre/#/login">
+                                login / register{" "}
+                              </a>
                             </p>
                           </li>
                           <li>
@@ -366,13 +369,15 @@ export default class HomePage extends Component {
                         <a href="#"> About </a>
                       </li>
                       <li>
-                        <a href="/categories">
+                        <a href="/tyrecentre/#/categories">
                           {" "}
                           Categories <i class="fa fa-angle-down"></i>
                         </a>
                         <ul class="submenu">
                           <li>
-                            <a href="/CategoryList">CategoryList</a>
+                            <a href="/tyrecentre/#/CategoryList">
+                              CategoryList
+                            </a>
                           </li>
                           <li>
                             <a href="#">blog no sidebar</a>
@@ -399,13 +404,15 @@ export default class HomePage extends Component {
                           </a>
                           <ul class="submenu">
                             <li>
-                              <a href="/add-brand">Add Brand</a>
+                              <a href="/tyrecentre/#/add-brand">Add Brand</a>
                             </li>
                             <li>
-                              <a href="/add-product">Add Product</a>
+                              <a href="/tyrecentre/#/add-product">
+                                Add Product
+                              </a>
                             </li>
                             <li>
-                              <a href="/puncture-repair-list?isAdmin=true">
+                              <a href="/tyrecentre/#/puncture-repair-list?isAdmin=true&isAdmin=true">
                                 Puncture Repair List
                               </a>
                             </li>
@@ -444,7 +451,10 @@ export default class HomePage extends Component {
                       <div class="account-dropdown">
                         <ul>
                           <li>
-                            <a onClick={() => this.logout()} href="/login">
+                            <a
+                              onClick={() => this.logout()}
+                              href="/tyrecentre/#/login"
+                            >
                               {localStorage.getItem("userEmail")
                                 ? "Logout"
                                 : "Login"}{" "}
@@ -452,7 +462,7 @@ export default class HomePage extends Component {
                           </li>
 
                           <li>
-                            <a href="/sign-up">Register</a>
+                            <a href="/tyrecentre/#/sign-up">Register</a>
                           </li>
                           <li>
                             <a href="#">Wishlist </a>
@@ -471,7 +481,10 @@ export default class HomePage extends Component {
                       <div class="account-dropdown">
                         <ul>
                           <li>
-                            <a onClick={() => this.logout()} href="/login">
+                            <a
+                              onClick={() => this.logout()}
+                              href="/tyrecentre/#/login"
+                            >
                               {localStorage.getItem("userEmail")
                                 ? "Logout"
                                 : "Login"}{" "}
@@ -479,7 +492,7 @@ export default class HomePage extends Component {
                           </li>
 
                           <li>
-                            <a href="/sign-up">Register</a>
+                            <a href="/tyrecentre/#/sign-up">Register</a>
                           </li>
                         </ul>
                       </div>
@@ -521,7 +534,7 @@ export default class HomePage extends Component {
                                 </a>
                               </h4>
                               <h6>Qty: {item.productQuantity}</h6>
-                              <span>${item.productPrice}</span>
+                              <span>&#8377;{item.productPrice}</span>
                             </div>
                             <div class="shopping-cart-delete">
                               {/* <a href="#">
@@ -558,24 +571,24 @@ export default class HomePage extends Component {
                       {/* *******CART TOTAL *********** */}
                       <div class="shopping-cart-total">
                         <h4>
-                          Shipping : <span>$20.00</span>
+                          Shipping : <span>&#8377;20.00</span>
                         </h4>
                         <h4>
                           SubTotal:
                           <span className="shop-total">
-                            ${this.calculateTotal()}
+                            &#8377;{this.calculateTotal()}
                           </span>
                         </h4>
                         <h4>
                           Tax (28%):
                           <span className="shop-total">
-                            ${(this.calculateTotal() * 0.28).toFixed(2)}
+                            &#8377;{(this.calculateTotal() * 0.28).toFixed(2)}
                           </span>
                         </h4>
                         <h4>
                           Final Amount to Pay:
                           <span>
-                            ${(this.calculateTotal() * 1.28).toFixed(2)}
+                            &#8377;{(this.calculateTotal() * 1.28).toFixed(2)}
                           </span>
                         </h4>
                       </div>
@@ -865,7 +878,7 @@ export default class HomePage extends Component {
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-sm-6">
-                <a href="/puncture-repair">
+                <a href="/tyrecentre/#/puncture-repair">
                   <div class="support-wrap mb-30 support-2">
                     <div class="support-icon">
                       <img
@@ -1383,8 +1396,8 @@ export default class HomePage extends Component {
                     <div class="product-details-content quickview-content">
                       <h2>Products Name Here</h2>
                       <div class="product-details-price">
-                        <span>$18.00 </span>
-                        <span class="old">$20.00 </span>
+                        <span>&#8377;18.00 </span>
+                        <span class="old">&#8377;20.00 </span>
                       </div>
                       <div class="pro-details-rating-wrap">
                         <div class="pro-details-rating">

@@ -110,8 +110,9 @@ class PunctureRepair extends Component {
       window.location.reload();
     }, 20000);
     window.location =
-      process.env.REACT_APP_API_URL +
-      "puncture-repair-list?mob=" +
+      "http://localhost:3000/tyrecentre/#/puncture-repair-list?mob=" +
+      this.state.mobileNumber +
+      "&mob=" +
       this.state.mobileNumber;
   };
 

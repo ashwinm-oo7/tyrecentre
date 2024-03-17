@@ -104,31 +104,18 @@ export default class SignUp extends Component {
             </div>
             <p className="forgot-password text-right">
               Already registered{" "}
-              <a href="/login">
+              <a href="/tyrecentre/#/login">
                 <FaSignInAlt style={{ marginRight: "5px" }} />
                 sign in?
               </a>
             </p>
             <p className="forgot-password text-right">
-              <a href="/home">
+              <a href="/tyrecentre/#/home">
                 <FaHome style={{ marginRight: "5px" }} />
                 Home
               </a>
             </p>
           </form>
-        </div>
-        <div className="tyrecentre-info">
-          <img
-            alt=""
-            src="assets/img/logo/tyrelogo.jpg"
-            style={{ width: "500px", height: "auto" }}
-          />
-          <p class="service-description">
-            <FaTools style={{ marginRight: "5px" }} />
-            Services Available <br />
-            For New Tyre and Puncture Repair
-          </p>
-          <img src={tyreLogo} alt="Tyre Logo" className="additional-logo" />
         </div>
       </div>
     );

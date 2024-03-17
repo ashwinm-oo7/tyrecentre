@@ -107,22 +107,9 @@ export default class Login extends Component {
             </p>
             <p className="forgot-password text-right">
               <FaHome style={{ marginRight: "5px" }} />
-              <a href="/home">Home</a>
+              <a href="/tyrecentre/#/home">Home</a>
             </p>
           </form>
-        </div>
-        <div className="tyrecentre-info">
-          <img
-            alt=""
-            src="assets/img/logo/tyrelogo.jpg"
-            style={{ width: "500px", height: "auto" }}
-          />
-          <p class="service-description">
-            <FaTools style={{ marginRight: "5px" }} />
-            Services Available <br />
-            For New Tyre and Puncture Repair
-          </p>
-          <img src={tyreLogo} alt="Tyre Logo" className="additional-logo" />
         </div>
       </div>
     );
@@ -281,7 +268,8 @@ export default class Login extends Component {
       if (response.ok) {
         console.log(loginData);
         console.log("User LOGIN successfully");
-        window.location = "http://localhost:3000/home";
+        // window.location = "http://localhost:3000/home";
+        window.location = "https://ashwinm-oo7.github.io/tyrecentre/#/home";
         localStorage.setItem("userEmail", loginData.email);
         localStorage.setItem("isAdmin", loginData.admin);
 

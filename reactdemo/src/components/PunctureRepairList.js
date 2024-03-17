@@ -21,8 +21,11 @@ class PunctureRepairList extends Component {
       isAdmin: false,
       totalAmount: 0,
     };
-    const urlSearchString = window.location.search;
-    const params = new URLSearchParams(urlSearchString);
+
+    const hash = window.location.hash.substr(1); // Remove the leading '#'
+    console.log(hash);
+    const params = new URLSearchParams(hash);
+    console.log(params.get("isAdmin"));
     this.state.mobileNumber = params.get("mob");
     this.state.isAdmin = params.get("isAdmin");
   }
@@ -41,7 +44,7 @@ class PunctureRepairList extends Component {
       const response = await axios.get(
         process.env.REACT_APP_API_URL + "punctureRepair/getAllStatusStr"
       );
-      console.log("Request for Repairing", response.data);
+      console.log("Request for Repairing", process.env.REACT_APP_API_URL);
       this.setState({ statusStr: response.data });
     } catch (error) {
       console.error("Error fetching puncture repairs:", error);
