@@ -1175,7 +1175,7 @@ export default class HomePage extends Component {
                     </a>
                   </div>
                   <p>
-                    © 2024 <a href="#">Jassa</a>.<br /> All Rights Reserved
+                    © 2024 <a href="#">Tyrewala</a>.<br /> All Rights Reserved
                   </p>
                 </div>
               </div>
