@@ -8,7 +8,6 @@ import {
   FaEnvelope,
   FaTools,
 } from "react-icons/fa";
-import HomePage from "./HomePage";
 import tyreLogo from "../icons/tyrelogo.png";
 import { toast } from "react-toastify";
 import "../css/login.css";
