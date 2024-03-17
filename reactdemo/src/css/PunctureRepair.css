@@ -1,0 +1,178 @@
+/* styles.css */
+.puncture-repair-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    float: left; /* Add this to align the form on the left */
+    margin-right: 20px; /* Add some spacing between the form and other content */
+
+}
+.container {
+    margin: 10px auto; /* Center the container */
+    max-width: 1400px; /* Set a maximum width for the container */
+}
+.puncture-repair-form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.puncture-repair-form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensure padding is included in width */
+    margin-bottom: 10px;
+}
+
+.puncture-repair-form button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.puncture-repair-form button:hover {
+    background-color: #0056b3;
+}
+
+.submitted-data {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .submitted-data h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .submitted-data p {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #666;
+  }
+  
+  /* 8888888888 Puncture List CSS 88888888888888888888888888888888 */
+
+  /* PunctureRepairList.css */
+
+.puncture-repair-list-container {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 1200px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center; 
+  }
+  select {
+    width: 190px; /* Adjust the width as needed */
+  }
+  
+  .puncture-repair-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+    background-color: #a6c3e1;
+  }
+  
+  .puncture-repair-list-header-item {
+    font-weight: bold;
+    flex: 1;
+    text-align: center;
+    border-right: 1px solid #ccc;
+  }
+
+  .puncture-repair-list-header-item:last-child {
+    border-right: none; /* Remove right border for last column */
+}
+
+  
+  .puncture-repair-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .puncture-repair-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+    
+  }
+  
+  .puncture-repair-item span {
+    flex: 1;
+    text-align: center;
+    border-right: 1px solid #000; 
+  }
+  .puncture-repair-item span:last-child {
+    border-right: none; /* Remove right border for the last span in each row */
+  }
+  
+  h2 {
+    background-color: #134274; /* Blue background color */
+    color: white; /* White text color */
+    padding: 10px; /* Add padding for better appearance */
+  }
+
+  /* Add this to your CSS file */
+.red {
+  color: rgb(15, 1, 1);
+  background-color: rgb(245, 5, 5);
+}
+
+.orange {
+  color: rgb(17, 11, 1);
+  background-color: rgb(193, 126, 3);
+  animation: blinker 1s linear infinite; /* Blinking effect */
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.green {
+  color: rgb(1, 20, 1);
+  background-color: green;
+}
+
+/* @media screen and (max-width: 768px) {
+  .puncture-repair-list-header span:first-child {
+    display: none;   }
+
+  .puncture-repair-list-container {
+    padding: 10px;
+  }
+
+  .puncture-repair-list-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+  }
+
+  .puncture-repair-list-item span {
+    margin-bottom: 5px; 
+  }
+
+  .puncture-repair-list-item select {
+    width: 100%; 
+  }
+  .puncture-repair-item span:first-child {
+    display: none; 
+  }
+} */
+

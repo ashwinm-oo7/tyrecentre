@@ -33,6 +33,17 @@ public class Product implements Serializable {
 	private String brandName;
 	private String productName;
 	private Double productPrice;
+	private Double productMrpPrice;
+	private Double discount;
+	
+	public Double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(Double discount) {
+		this.discount = discount;
+	}
+
 	private Integer productQuantity;
 	private String skuCode;
 	private String manufacturer;
@@ -75,8 +86,6 @@ public class Product implements Serializable {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate
-
-
 	private Date lastModifiedDate;
 
 	public String getId() {
@@ -190,6 +199,14 @@ public class Product implements Serializable {
 
 	public void setVehicleBrandModels(List<ValueObjectDTO> vehicleBrandModels) {
 		this.vehicleBrandModels = vehicleBrandModels;
+	}
+
+	public Double getProductMrpPrice() {
+		return productMrpPrice;
+	}
+
+	public void setProductMrpPrice(Double productMrpPrice) {
+		this.productMrpPrice = productMrpPrice;
 	}
 
 

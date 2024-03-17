@@ -6,13 +6,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import com.tyrecentre.entity.Product;
-import com.tyrecentre.entity.ProductImages;
 import com.tyrecentre.repo.ProductRepo;
 import com.tyrecentre.utility.FileUtility;
 
@@ -22,7 +22,13 @@ public class ProductService {
 	@Autowired
 	ProductRepo productRepo;
 	
-	String fileDir = "C:\\Users\\Ashwin\\OneDrive\\Pictures\\AshwinImage\\UploadedImages\\";
+	@Autowired
+	Environment env;
+	
+	public static String fileDir;
+	public ProductService(Environment env) {
+		fileDir 			= env.getProperty("PRODUCT_IMAGE_PATH");
+	}
 
 	public ResponseEntity<?> addOrUpdateTyreCompany(@NonNull Product entity) {
 		
