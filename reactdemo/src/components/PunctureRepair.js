@@ -110,7 +110,7 @@ class PunctureRepair extends Component {
       window.location.reload();
     }, 20000);
     window.location =
-      "http://localhost:3000/tyrecentre/#/puncture-repair-list?mob=" +
+      "http://www.tyrewala.in:8080/tyrecentre/#/puncture-repair-list?mob=" +
       this.state.mobileNumber +
       "&mob=" +
       this.state.mobileNumber;

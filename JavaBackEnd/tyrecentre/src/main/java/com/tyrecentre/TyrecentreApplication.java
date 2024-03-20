@@ -28,7 +28,7 @@ public class TyrecentreApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**").allowedOrigins("http://localhost:3000/","https://ashwinm-oo7.github.io/tyrecentre/"
-						,"http://www.tyrewala.in:3000/")
+						,"http://www.tyrewala.in:8080/")
 				.allowedMethods("GET","POST","PUT","DELETE");
 			}
 		};

@@ -265,7 +265,7 @@ export default class Login extends Component {
         console.log(loginData);
         console.log("User LOGIN successfully");
         // window.location = "http://localhost:3000/tyrecentre/#/home";
-        window.location = "https://ashwinm-oo7.github.io/tyrecentre/#/home";
+        window.location = "http://www.tyrewala.in:8080/tyrecentre/#/home";
         localStorage.setItem("userId", loginData.id);
         localStorage.setItem("firstName", loginData.firstName);
         localStorage.setItem("lastName", loginData.lastName);
