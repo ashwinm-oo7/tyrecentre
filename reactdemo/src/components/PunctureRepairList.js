@@ -8,6 +8,7 @@ import {
   FaCar,
   FaTools,
   FaInfoCircle,
+  FaRupeeSign,
 } from "react-icons/fa";
 
 class PunctureRepairList extends Component {
@@ -179,11 +180,10 @@ class PunctureRepairList extends Component {
             Vehicle Number
           </span>
           <span className="puncture-repair-list-header-item">
-            {" "}
-            <FaInfoCircle style={{ marginRight: "5px" }} />
+            <FaRupeeSign style={{ marginRight: "5px" }} />
             Total Amount
           </span>
-          <span className="puncture-repair-list-header-item">
+          <span className="puncture-repair-list-header-item status">
             {" "}
             <FaInfoCircle style={{ marginRight: "5px" }} />
             Status
@@ -196,6 +196,7 @@ class PunctureRepairList extends Component {
               <span>{repair.mobileNumber}</span>
               <span>{repair.vehiclePlateNo}</span>
               <span>
+                {/* <>&#8377;</>   */}
                 <input
                   disabled={!this.state.isAdmin}
                   type="number"

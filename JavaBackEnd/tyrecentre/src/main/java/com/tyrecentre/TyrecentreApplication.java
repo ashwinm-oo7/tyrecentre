@@ -27,7 +27,7 @@ public class TyrecentreApplication {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOrigins("http://localhost:3000/")
+				registry.addMapping("/**").allowedOrigins("http://localhost:3000/","https://ashwinm-oo7.github.io/tyrecentre/")
 				.allowedMethods("GET","POST","PUT","DELETE");
 			}
 		};

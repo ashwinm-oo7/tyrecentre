@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const EditProductModal = ({ productId, onSave, onClose }) => {
   const [product, setProduct] = useState(null);
@@ -8,10 +8,12 @@ const EditProductModal = ({ productId, onSave, onClose }) => {
     // Fetch selected product details
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/product/${productId}`);
+        const response = await axios.get(
+          process.env.REACT_APP_API_URL + `product/${productId}`
+        );
         setProduct(response.data);
       } catch (error) {
-        console.error('Error fetching product:', error);
+        console.error("Error fetching product:", error);
       }
     };
 
@@ -21,7 +23,7 @@ const EditProductModal = ({ productId, onSave, onClose }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     // Perform update operation here
-    // Example: 
+    // Example:
     // await axios.put(`http://localhost:8080/product/${productId}`, product);
     onSave(product);
     onClose();
@@ -29,9 +31,9 @@ const EditProductModal = ({ productId, onSave, onClose }) => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setProduct(prevProduct => ({
+    setProduct((prevProduct) => ({
       ...prevProduct,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -42,11 +44,18 @@ const EditProductModal = ({ productId, onSave, onClose }) => {
   return (
     <div className="modal">
       <div className="modal-content">
-        <span className="close" onClick={onClose}>&times;</span>
+        <span className="close" onClick={onClose}>
+          &times;
+        </span>
         <h2>Edit Product</h2>
         <form onSubmit={handleSubmit}>
           <label>Name:</label>
-          <input type="text" name="name" value={product.name} onChange={handleChange} />
+          <input
+            type="text"
+            name="name"
+            value={product.name}
+            onChange={handleChange}
+          />
           {/* Render other form fields similarly */}
           <button type="submit">Save Changes</button>
         </form>

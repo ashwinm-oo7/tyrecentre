@@ -46,8 +46,9 @@ class AddProduct extends Component {
       tyreSize: "",
     };
     this.state.productIdToUpdate = ""; // logic to get data from URL
-    const urlSearchString = window.location.search;
-    const params = new URLSearchParams(urlSearchString);
+    const hash = window.location.hash.substr(1); // Remove the leading '#'
+    console.log(hash);
+    const params = new URLSearchParams(hash);
     this.state.productIdToUpdate = params.get("id");
     console.log("ID FROM URL : ", this.state.productIdToUpdate);
     if (this.state.productIdToUpdate) {
@@ -447,7 +448,8 @@ class AddProduct extends Component {
         <div className="tab-content">
           <div>
             <label>
-              Category:
+              Category
+              :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <select
                 id="categorySelectId"
                 value={this.state.selectedCategory}
@@ -464,7 +466,7 @@ class AddProduct extends Component {
             </label>
 
             <label>
-              Subcategory:
+              SubCategory:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <select
                 id="subCategorySelectId"
                 value={this.state.selectedSubCategory}
@@ -481,7 +483,7 @@ class AddProduct extends Component {
             </label>
 
             <label>
-              Tyre Company:
+              Tyre Company :&nbsp;
               <select
                 id="brandSelectId"
                 value={this.state.selectedBrand}

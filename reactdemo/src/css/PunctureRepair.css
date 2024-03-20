@@ -117,6 +117,10 @@
     text-align: center;
     border-right: 1px solid #000; 
   }
+  .puncture-repair-list input{
+    width: 70%;
+    margin-left: 30px;
+  }
   .puncture-repair-item span:last-child {
     border-right: none; /* Remove right border for the last span in each row */
   }
@@ -125,6 +129,7 @@
     background-color: #134274; /* Blue background color */
     color: white; /* White text color */
     padding: 10px; /* Add padding for better appearance */
+    font-size: 49px;
   }
 
   /* Add this to your CSS file */
@@ -150,29 +155,70 @@
   background-color: green;
 }
 
-/* @media screen and (max-width: 768px) {
-  .puncture-repair-list-header span:first-child {
-    display: none;   }
+@media screen and (max-width: 768px) {
+  .puncture-repair-form {
+    max-width: 100%; /* Adjust width to fit smaller screens */
+    margin: 0 auto;
+    float: none; /* Remove float to center the form */
+    margin-bottom: 20px; /* Add some spacing between the form and other content */
+    padding: 10px; /* Adjust padding for smaller screens */
+  }
+
+  .puncture-repair-form input[type="text"] {
+    width: 100%; /* Set input width to 100% for smaller screens */
+  }
 
   .puncture-repair-list-container {
-    padding: 10px;
+    width: 100%; /* Set width to 100% for smaller screens */
+    padding: 10px; /* Adjust padding for smaller screens */
+  }
+  .puncture-repair-list-header-item:last-child {
+    margin-right: 20px;
+  }
+  h2{
+    font-size: 24px;
   }
 
-  .puncture-repair-list-item {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
+
+  .puncture-repair-list-header {
+    flex-direction: row; /* Change flex direction to column for smaller screens */
   }
 
-  .puncture-repair-list-item span {
-    margin-bottom: 5px; 
+  .puncture-repair-list-header-item {
+    flex: none; /* Remove flex property to prevent items from stretching */
+    width: auto; /* Set width to auto for smaller screens */
+    border-right: none; /* Remove right border for smaller screens */
+    border-bottom: 1px solid #ccc; /* Add bottom border for smaller screens */
+  }
+  .puncture-repair-list-header-item:nth-child(5){
+    margin-left: 0px;}
+
+  .puncture-repair-item {
+    flex-direction: row; /* Change flex direction to column for smaller screens */
   }
 
-  .puncture-repair-list-item select {
-    width: 100%; 
+  .puncture-repair-item span {
+    border-right: none; /* Remove right border for smaller screens */
+    border-bottom: 1px solid #ccc; /* Add bottom border for smaller screens */
   }
-  .puncture-repair-item span:first-child {
-    display: none; 
-  }
-} */
 
+  .puncture-repair-list input {
+
+    width: 70%; /* Set input width to 100% for smaller screens */
+    margin-left: 10%; /* Remove left margin for smaller screens */
+    margin-top: 10px; /* Add top margin for smaller screens */
+  }
+  .puncture-repair-list select{
+    margin-left: 15px;
+    width: 70%;
+    font-size: 10px;
+  }
+
+  /* Hide location and vehicle number on mobile */
+  .puncture-repair-list-header-item:nth-child(1),
+  .puncture-repair-item span:nth-child(1),
+  .puncture-repair-list-header-item:nth-child(3),
+  .puncture-repair-item span:nth-child(3) {
+    display: none;
+  }
+}

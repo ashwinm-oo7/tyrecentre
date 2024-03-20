@@ -1,6 +1,7 @@
 import React, { Component, useState } from "react";
 import { FaBicycle, FaCar } from "react-icons/fa";
 import axios from "axios";
+import "../css/home.css";
 export default class HomePage extends Component {
   constructor(props) {
     super(props);
@@ -10,6 +11,12 @@ export default class HomePage extends Component {
       carBrands: [],
       bikeBrands: [],
       cart: [],
+      selectedProduct: null,
+      searchData: [], // Your original data array
+      searchQuery: "",
+      searchResults: [],
+      isFormVisible: false,
+      feedback: "",
     };
     this.fetchAllProducts();
     this.fetchAllBikeProducts();
@@ -18,6 +25,24 @@ export default class HomePage extends Component {
     this.handleCheckout = this.handleCheckout.bind(this);
     this.fetchCartFromLocalStorage();
   }
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        process.env.REACT_APP_API_URL + "feedback/addFeedback",
+        { feedback: this.state.feedback }
+      );
+      console.log("Feedback submitted:", response.data);
+      // Handle success, e.g., show a success message to the user
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      // Handle error, e.g., show an error message to the user
+    }
+  };
+
+  handleChange = (e) => {
+    this.setState({ feedback: e.target.value });
+  };
 
   calculateDiscountPercentage = async (mrp, price) => {
     return ((mrp - price) / mrp) * 100;
@@ -52,7 +77,9 @@ export default class HomePage extends Component {
           }
         });
       response.data
-        .filter((prod) => prod.categoryName === "Four Wheeler")
+        .filter(
+          (prod) => prod.categoryName === "Four Wheeler" || "Three Wheeler"
+        )
         .forEach(async (prod, index) => {
           const discountPercentage = await this.calculateDiscountPercentage(
             prod.productMrpPrice,
@@ -95,8 +122,8 @@ export default class HomePage extends Component {
 
   logout() {
     localStorage.clear();
-    // window.location = "http://localhost:3000/tyrecentre/#/login";
-    window.location = "https://ashwinm-oo7.github.io/tyrecentre/#/login";
+    window.location = "http://localhost:3000/tyrecentre/#/login";
+    // window.location = "https://ashwinm-oo7.github.io/tyrecentre/#/login";
   }
   handleAddToCart = (product) => {
     const updatedCart = [...this.state.cart, product];
@@ -153,7 +180,34 @@ export default class HomePage extends Component {
     localStorage.setItem("cart", JSON.stringify(cart));
   }
 
+  fetchProductDetails = (selectedProduct) => {
+    console.log("Selected Product:", selectedProduct); // For debugging
+    // Perform any additional actions to fetch product details as needed
+    this.setState({ selectedProduct });
+  };
+
+  handleInputChange = (e) => {
+    const query = e.target.value;
+    this.setState({ searchQuery: query }, () => {
+      this.performSearch();
+    });
+  };
+
+  performSearch = () => {
+    const { searchData, searchQuery } = this.state;
+    const results = searchData.filter((item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    this.setState({ searchResults: results });
+  };
+  toggleFormVisibility = () => {
+    this.setState({ isFormVisible: !this.state.isFormVisible });
+  };
+
   render() {
+    const { searchQuery, searchResults } = this.state;
+    const { isFormVisible } = this.state;
+
     return (
       <div className="">
         <header class="header-area header-padding-1 sticky-bar header-res-padding clearfix">
@@ -171,7 +225,7 @@ export default class HomePage extends Component {
                 </div>
               </div>
               <div class="col-xl-8 col-lg-8 d-none d-lg-block">
-                <div class="main-menu">
+                <div class="main-menu" style={{ backgroundColor: "#e6e6ff" }}>
                   <nav>
                     <ul>
                       <li>
@@ -182,7 +236,7 @@ export default class HomePage extends Component {
                           <li>
                             <ul>
                               <li class="mega-menu-title">
-                                <a href="#">Demo Group 01</a>
+                                <a>Four Wheeler</a>
                               </li>
                               {this.state.carBrands.map((vehi, index2) => (
                                 <li>
@@ -191,6 +245,24 @@ export default class HomePage extends Component {
                                   </a>
                                 </li>
                               ))}
+                            </ul>
+                          </li>
+                          <li>
+                            <ul>
+                              <li class="mega-menu-img">
+                                <a href="#">
+                                  <img
+                                    src="assets/img/cars/car.webp"
+                                    style={{ width: "400px" }}
+                                    alt=""
+                                  />
+                                  <img
+                                    src="assets/img/cars/4tyre.webp"
+                                    style={{ width: "450px" }}
+                                    alt=""
+                                  />
+                                </a>
+                              </li>
                             </ul>
                           </li>
                         </ul>
@@ -204,7 +276,7 @@ export default class HomePage extends Component {
                           <li>
                             <ul>
                               <li class="mega-menu-title">
-                                <a href="#">Demo Group 01</a>
+                                <a href="#">Two Wheeler</a>
                               </li>
                               {this.state.bikeBrands.map((vehi, index2) => (
                                 <li>
@@ -217,40 +289,13 @@ export default class HomePage extends Component {
                           </li>
                           <li>
                             <ul>
-                              <li class="mega-menu-title">
-                                <a href="#">product details</a>
-                              </li>
-                              <li>
-                                <a href="#">tab style 1</a>
-                              </li>
-                              <li>
-                                <a href="#">tab style 2</a>
-                              </li>
-                              <li>
-                                <a href="#">tab style 3</a>
-                              </li>
-                              <li>
-                                <a href="#">sticky style</a>
-                              </li>
-                              <li>
-                                <a href="#">gallery style </a>
-                              </li>
-                              <li>
-                                <a href="#">Slider style</a>
-                              </li>
-                              <li>
-                                <a href="#">affiliate style</a>
-                              </li>
-                              <li>
-                                <a href="#">fixed image style </a>
-                              </li>
-                            </ul>
-                          </li>
-                          <li>
-                            <ul>
                               <li class="mega-menu-img">
                                 <a href="#">
-                                  <img src="assets/img/cars/bike.webp" alt="" />
+                                  <img
+                                    src="assets/img/cars/scooter.webp"
+                                    style={{ width: "350px" }}
+                                    alt=""
+                                  />
                                 </a>
                               </li>
                             </ul>
@@ -259,67 +304,17 @@ export default class HomePage extends Component {
                       </li>
                       <li>
                         <a href="#">
-                          Scooter <i class="fa fa-angle-down"></i>
-                        </a>
-                        <ul class="mega-menu">
-                          <li>
-                            <ul>
-                              <li class="mega-menu-title">
-                                <a href="#">shop layout</a>
-                              </li>
-                              <li>
-                                <a href="#">standard style</a>
-                              </li>
-                              <li>
-                                <a href="#">Grid filter style</a>
-                              </li>
-                              <li>
-                                <a href="#">Grid 2 column</a>
-                              </li>
-                              <li>
-                                <a href="#">Grid No sidebar</a>
-                              </li>
-                              <li>
-                                <a href="#">Grid full wide </a>
-                              </li>
-                              <li>
-                                <a href="#">Grid right sidebar</a>
-                              </li>
-                              <li>
-                                <a href="#">list 1 column box </a>
-                              </li>
-                              <li>
-                                <a href="#">list 1 column full wide </a>
-                              </li>
-                              <li>
-                                <a href="#">list 2 column full wide</a>
-                              </li>
-                            </ul>
-                          </li>
-                          <li class="mega-menu-img">
-                            <a href="#">
-                              <img src="assets/img/cars/scooter.webp" alt="" />
-                            </a>
-                          </li>
-                        </ul>
-                      </li>
-                      <li>
-                        <a href="#">
-                          {" "}
                           Details <i class="fa fa-angle-down"></i>
                         </a>
                         <ul class="submenu">
                           <li>
                             <p>
-                              <a href="/tyrecentre/#/login">
-                                login / register{" "}
-                              </a>
+                              <a href="/tyrecentre/#/login">login / register</a>
                             </p>
                           </li>
                           <li>
-                            <a href="/about">about us</a>
+                            <a href="/tyrecentre/#/about">about us</a>
                           </li>
-
                           <li>
                             <a href="#">cart page</a>
                           </li>
@@ -330,7 +325,7 @@ export default class HomePage extends Component {
                             <a href="#">wishlist </a>
                           </li>
                           <li>
-                            <a href="#">my account</a>
+                            <a href="/tyrecentre/#/myAccount">My Account</a>
                           </li>
                           <li>
                             <a href="#">contact us </a>
@@ -340,7 +335,7 @@ export default class HomePage extends Component {
                           </li>
                         </ul>
                       </li>
-                      <li>
+                      {/* <li>
                         <a href="#">
                           Blog <i class="fa fa-angle-down"></i>
                         </a>
@@ -364,13 +359,12 @@ export default class HomePage extends Component {
                             <a href="#">blog details 3</a>
                           </li>
                         </ul>
-                      </li>
-                      <li>
-                        <a href="#"> About </a>
-                      </li>
-                      <li>
+                      </li> */}
+                      {/* <li>
+                        <a href="/tyrecentre/#/about"> About </a>
+                      </li> */}
+                      {/* <li>
                         <a href="/tyrecentre/#/categories">
-                          {" "}
                           Categories <i class="fa fa-angle-down"></i>
                         </a>
                         <ul class="submenu">
@@ -395,7 +389,7 @@ export default class HomePage extends Component {
                             <a href="#">blog details 3</a>
                           </li>
                         </ul>
-                      </li>
+                      </li> */}
                       {localStorage.getItem("isAdmin") === "true" ? (
                         <li>
                           <a href="#">
@@ -407,8 +401,8 @@ export default class HomePage extends Component {
                               <a href="/tyrecentre/#/add-brand">Add Brand</a>
                             </li>
                             <li>
-                              <a href="/tyrecentre/#/add-product">
-                                Add Product
+                              <a href="/tyrecentre/#/CategoryList">
+                                CategoryList
                               </a>
                             </li>
                             <li>
@@ -417,7 +411,14 @@ export default class HomePage extends Component {
                               </a>
                             </li>
                             <li>
-                              <a href="/product-list">Product List</a>
+                              <a href="/tyrecentre/#/product-list">
+                                Product List
+                              </a>
+                            </li>
+                            <li>
+                              <a href="/tyrecentre/#/feedback-list">
+                                Feedback List
+                              </a>
                             </li>
                           </ul>
                         </li>
@@ -436,10 +437,19 @@ export default class HomePage extends Component {
                     </a>
                     <div class="search-content">
                       <form action="#">
-                        <input type="text" placeholder="Search" />
-                        <button class="button-search">
+                        <input
+                          type="text"
+                          placeholder="Search"
+                          value={searchQuery}
+                          onChange={this.handleInputChange}
+                        />
+                        <ul>
+                          {searchResults.map((result) => (
+                            <li key={result.id}>{result.name}</li>
+                          ))}
                           <i class="pe-7s-search"></i>
-                        </button>
+                        </ul>
+                        {/* </button> */}
                       </form>
                     </div>
                   </div>
@@ -498,11 +508,14 @@ export default class HomePage extends Component {
                       </div>
                     </div>
                   )}
-                  <div class="same-style header-wishlist">
-                    <a href="#">
-                      <i class="pe-7s-like"></i>
-                    </a>
-                  </div>
+                  {this.state.selectedProduct && (
+                    <div class="same-style header-wishlist">
+                      <a href="#">
+                        <i class="pe-7s-like"></i>
+                        {/* <p>{this.state.selectedProduct.productName}</p> */}
+                      </a>
+                    </div>
+                  )}
                   {/* 888888888888 CART LIST 888888888888888888888888888 */}
                   <div class="same-style cart-wrap">
                     <button class="icon-cart" onClick={this.handleCartClick}>
@@ -548,25 +561,6 @@ export default class HomePage extends Component {
                             </div>
                           </li>
                         ))}
-                        {/* <li class="single-shopping-cart">
-                          <div class="shopping-cart-img">
-                            <a href="#">
-                              <img alt="" src="assets/img/cart/Ceat5.webp" />
-                            </a>
-                          </div>
-                          <div class="shopping-cart-title">
-                            <h4>
-                              <a href="#">T- Shart & Jeans </a>
-                            </h4>
-                            <h6>Qty: 02</h6>
-                            <span>$260.00</span>
-                          </div>
-                          <div class="shopping-cart-delete">
-                            <a href="#">
-                              <i class="fa fa-times-circle"></i>
-                            </a>
-                          </div>
-                        </li> */}
                       </ul>
                       {/* *******CART TOTAL *********** */}
                       <div class="shopping-cart-total">
@@ -607,49 +601,32 @@ export default class HomePage extends Component {
                   </div>
                 </div>
               </div>
+              {/* 77777777777777777777 */}
             </div>
             <div class="mobile-menu-area">
               <div class="mobile-menu">
                 <nav id="mobile-menu-active">
                   <ul class="menu-overflow">
                     <li>
-                      <a href="#">HOME</a>
+                      <a href="/tyrecentre/#/home">HOME</a>
                       <ul>
                         <li>
-                          <a href="#">Demo Group 011</a>
+                          <a href="#">Collection</a>
                           <ul>
                             <li>
-                              <a href="#">Home 1 – Fashion</a>
+                              <a href="#">Two Wheeler</a>
                             </li>
                             <li>
-                              <a href="#">Home 2 – Fashion</a>
+                              <a href="#">Three Wheeler</a>
                             </li>
                             <li>
-                              <a href="#">Home 3 – Fashion</a>
+                              <a href="#">Four Wheeler</a>
                             </li>
                             <li>
-                              <a href="#">Home 4 – Fashion</a>
+                              <a href="#">Puncture Material Kit</a>
                             </li>
                             <li>
-                              <a href="#">Home 5 – Fashion</a>
-                            </li>
-                            <li>
-                              <a href="#">Home 6 – Fashion</a>
-                            </li>
-                            <li>
-                              <a href="#">Home 7 – Fashion</a>
-                            </li>
-                            <li>
-                              <a href="#">Home 8 – Minimal</a>
-                            </li>
-                            <li>
-                              <a href="#">Home 9 – Electronics</a>
-                            </li>
-                            <li>
-                              <a href="#">Home 10 – Furniture</a>
-                            </li>
-                            <li>
-                              <a href="#">Home 11 - showcase slider</a>
+                              <a href="#">Tubes</a>
                             </li>
                           </ul>
                         </li>
@@ -659,38 +636,34 @@ export default class HomePage extends Component {
                       <a href="#">Shop</a>
                       <ul>
                         <li>
-                          <a href="#">shop layout</a>
+                          <a href="#">Tyre Company</a>
                           <ul>
                             <li>
-                              <a href="#">standard style</a>
+                              <a href="https://www.mrftyres.com/">MRF</a>
                             </li>
                             <li>
-                              <a href="#">Grid filter style</a>
+                              <a href="https://www.ceat.com/">CEAT</a>
                             </li>
                             <li>
-                              <a href="#">Grid 2 column</a>
+                              <a href="https://www.bridgestone.co.in/">
+                                Bridge Stone
+                              </a>
                             </li>
                             <li>
-                              <a href="#">Grid No sidebar</a>
+                              <a href="https://jktyre.com/">JK Tyre</a>
                             </li>
                             <li>
-                              <a href="#">Grid full wide </a>
+                              <a href="https://tvseurogrip.com/">TVS</a>
                             </li>
                             <li>
-                              <a href="#">Grid right sidebar</a>
+                              <a href="https://www.goodyear.co.in/">GoodYear</a>
                             </li>
                             <li>
-                              <a href="#">list 1 column box </a>
-                            </li>
-                            <li>
-                              <a href="#">list 1 column full wide </a>
-                            </li>
-                            <li>
-                              <a href="#">list 2 column full wide</a>
+                              <a href="https://www.michelin.in/">Michelin</a>
                             </li>
                           </ul>
                         </li>
-                        <li>
+                        {/* <li>
                           <a href="#">product details</a>
                           <ul>
                             <li>
@@ -718,70 +691,33 @@ export default class HomePage extends Component {
                               <a href="#">fixed image style </a>
                             </li>
                           </ul>
-                        </li>
+                        </li> */}
                       </ul>
                     </li>
+                    {localStorage.getItem("isAdmin") === "true" ? (
+                      <li>
+                        <a>Master Admin</a>
+                        <ul>
+                          <li>
+                            <a href="/tyrecentre/#/add-brand">Add Brand</a>
+                          </li>
+                          <li>
+                            <a href="/tyrecentre/#/puncture-repair-list?isAdmin=true&isAdmin=true">
+                              Puncture Repair List
+                            </a>
+                          </li>
+                        </ul>
+                      </li>
+                    ) : (
+                      <></>
+                    )}
                     <li>
-                      <a href="#">Collection</a>
-                    </li>
-                    <li>
-                      <a href="#">Pages</a>
+                      <a>Pages</a>
                       <ul>
                         <li>
-                          <a href="#">about us</a>
-                        </li>
-                        <li>
-                          <a href="#">cart page</a>
-                        </li>
-                        <li>
-                          <a href="#">checkout </a>
-                        </li>
-                        <li>
-                          <a href="#">wishlist </a>
-                        </li>
-                        <li>
-                          <a href="#">my account</a>
-                        </li>
-                        <li>
-                          <a href="#">login / register </a>
-                        </li>
-                        <li>
-                          <a href="#">contact us </a>
-                        </li>
-                        <li>
-                          <a href="#">404 page </a>
+                          <a href="/tyrecentre/#/about">about us</a>
                         </li>
                       </ul>
-                    </li>
-                    <li>
-                      <a href="#">Blog</a>
-                      <ul>
-                        <li>
-                          <a href="#">blog standard</a>
-                        </li>
-                        <li>
-                          <a href="#">blog no sidebar</a>
-                        </li>
-                        <li>
-                          <a href="#">blog right sidebar</a>
-                        </li>
-                        <li>
-                          <a href="#">blog details 1</a>
-                        </li>
-                        <li>
-                          <a href="#l">blog details 2</a>
-                        </li>
-                        <li>
-                          <a href="#">blog details 3</a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#">About</a>
-                    </li>
-
-                    <li>
-                      <a href="#">Categories</a>
                     </li>
                   </ul>
                 </nav>
@@ -798,7 +734,6 @@ export default class HomePage extends Component {
                     <div class="slider-content slider-animated-1">
                       <h3 class="animated"> Tubeless Tyre</h3>
                       <h1 class="animated">
-                        {" "}
                         Choose Best Tyre Offer <br />
                         2024 Collection
                       </h1>
@@ -816,7 +751,6 @@ export default class HomePage extends Component {
                         src="assets/img/slider/Ceat.webp"
                         alt=""
                       />
-
                       <img
                         class="animated"
                         src="assets/img/slider/Ceat2.webp"
@@ -834,7 +768,6 @@ export default class HomePage extends Component {
                     <div class="slider-content slider-animated-1">
                       <h3 class="animated"> All Type of Variants</h3>
                       <h1 class="animated">
-                        {" "}
                         Best Services <br />
                         ALL TIME
                       </h1>
@@ -905,7 +838,7 @@ export default class HomePage extends Component {
                   </div>
                   <div class="support-content">
                     <h5>Money Return</h5>
-                    <p>Free shipping on all order</p>
+                    <p>T&C apply</p>
                   </div>
                 </div>
               </div>
@@ -920,7 +853,7 @@ export default class HomePage extends Component {
                   </div>
                   <div class="support-content">
                     <h5>Order Discount</h5>
-                    <p>Free shipping on all order</p>
+                    <p>Best Offer</p>
                   </div>
                 </div>
               </div>
@@ -952,7 +885,7 @@ export default class HomePage extends Component {
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
                           <div class="product-img">
-                            <a href="/" key={index}>
+                            <a href="##" key={index}>
                               <img
                                 className="default-img"
                                 src={prod.productImages[1].dataURL}
@@ -965,7 +898,12 @@ export default class HomePage extends Component {
                               />
                             </a>
                             <span class="pink">{prod.discount}</span>
-                            <div class="product-action">
+                            <div
+                              class="product-action"
+                              onClick={() => {
+                                this.setState({ selectedProduct: prod });
+                              }}
+                            >
                               <div class="pro-same-action pro-wishlist">
                                 <a title="Wishlist" href="/">
                                   <i class="pe-7s-like"></i>
@@ -1024,7 +962,7 @@ export default class HomePage extends Component {
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
                           <div class="product-img">
-                            <a href="/" key={index}>
+                            <a href="##" key={index}>
                               <img
                                 className="default-img"
                                 src={prod.productImages[1].dataURL}
@@ -1037,9 +975,19 @@ export default class HomePage extends Component {
                               />
                             </a>
                             <span class="pink">{prod.discount}</span>
-                            <div class="product-action">
-                              <div class="pro-same-action pro-wishlist">
-                                <a title="Wishlist" href="/">
+                            <div
+                              class="product-action"
+                              onClick={() => {
+                                this.setState({ selectedProduct: prod });
+                              }}
+                            >
+                              <div
+                                class="pro-same-action pro-wishlist"
+                                onClick={() => {
+                                  this.setState({ selectedProduct: prod });
+                                }}
+                              >
+                                <a title="Wishlist" href="##">
                                   <i class="pe-7s-like"></i>
                                 </a>
                               </div>
@@ -1091,7 +1039,7 @@ export default class HomePage extends Component {
               <div class="tab-pane" id="product-3">
                 <div class="row">
                   {this.state.products
-                    .filter((prod) => prod.categoryName === "Four Wheeler")
+                    .filter((prod) => prod.categoryName === "Three Wheeler")
                     .map((prod, index) => (
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
@@ -1113,10 +1061,15 @@ export default class HomePage extends Component {
                                 alt={`Image ${index}`}
                               />
                             </a>
-                            <span class="pink">-10%</span>
-                            <div class="product-action">
+                            <span class="pink">{prod.discount}</span>
+                            <div
+                              class="product-action"
+                              onClick={() => {
+                                this.setState({ selectedProduct: prod });
+                              }}
+                            >
                               <div class="pro-same-action pro-wishlist">
-                                <a title="Wishlist" href="#">
+                                <a title="Wishlist" href="##">
                                   <i class="pe-7s-like"></i>
                                 </a>
                               </div>
@@ -1200,17 +1153,17 @@ export default class HomePage extends Component {
                   <div class="footer-list">
                     <ul>
                       <li>
-                        <a href="#">About us</a>
+                        <a href="/tyrecentre/#/about">About us</a>
                       </li>
                       <li>
-                        <a href="#">Store location</a>
+                        <a href="/">Store location : Jogeshwari Mumbai(102)</a>
                       </li>
                       <li>
-                        <a href="#">Contact</a>
+                        <a href="#">Contact : ashwinmaurya9211@gmail.com</a>
                       </li>
-                      <li>
+                      {/* <li>
                         <a href="#">Orders tracking</a>
-                      </li>
+                      </li> */}
                     </ul>
                   </div>
                 </div>
@@ -1246,16 +1199,61 @@ export default class HomePage extends Component {
                   <div class="footer-list">
                     <ul>
                       <li>
-                        <a href="#">Facebook</a>
+                        <a
+                          class="fa fa-facebook"
+                          href="https://www.facebook.com/ASHMI6oo7/"
+                        >
+                          &nbsp; Facebook
+                        </a>
                       </li>
                       <li>
-                        <a href="#">Twitter</a>
+                        <a
+                          class="fa fa-linkedin"
+                          href="https://www.linkedin.com/in/ashwini-kumar-maurya-531554205/"
+                        >
+                          &nbsp; linkedin
+                        </a>
                       </li>
                       <li>
-                        <a href="#">Instagram</a>
+                        <a
+                          class="fa fa-instagram"
+                          href="https://www.instagram.com/ashwin_oo7/"
+                        >
+                          &nbsp; Instagram
+                        </a>
                       </li>
                       <li>
-                        <a href="#">Youtube</a>
+                        <a
+                          class="fa fa-youtube"
+                          href="https://www.youtube.com/channel/UCXE9IrBDQDwf2If_S6XKKiw"
+                        >
+                          &nbsp; Youtube
+                        </a>
+                      </li>
+                      <li>
+                        <button
+                          className="feedback-button"
+                          id="feedback-button"
+                          onClick={this.toggleFormVisibility}
+                        >
+                          Leave Feedback
+                        </button>
+                        {isFormVisible && (
+                          <div className="feedback-form">
+                            <form onSubmit={this.handleSubmit}>
+                              <label htmlFor="feedback">Your Feedback:</label>
+                              <textarea
+                                id="feedback"
+                                name="feedback"
+                                rows="4"
+                                cols="50"
+                                onChange={this.handleChange}
+                                placeholder="Enter your feedback here..."
+                              ></textarea>
+                              <input type="submit" value="Submit" />
+                            </form>
+                          </div>
+                        )}
                       </li>
                     </ul>
                   </div>
@@ -1329,220 +1327,269 @@ export default class HomePage extends Component {
                   aria-label="Close"
                 ></button>
               </div>
-              <div class="modal-body">
-                <div class="row">
-                  <div class="col-md-5 col-sm-12 col-xs-12">
-                    <div class="tab-content quickview-big-img">
-                      <div id="pro-1" class="tab-pane fade show active">
-                        <img
-                          src="assets/img/product/quickview-l1.webp"
-                          alt=""
-                        />
+              {this.state.selectedProduct && (
+                <div
+                  class="modal-body"
+                  onClick={() =>
+                    this.fetchProductDetails(this.state.selectedProduct)
+                  }
+                >
+                  <div class="row">
+                    <div class="col-md-5 col-sm-12 col-xs-12">
+                      <div class="tab-content quickview-big-img">
+                        <div id="pro-1" class="tab-pane fade show active">
+                          <img
+                            src={
+                              this.state.selectedProduct.productImages[0]
+                                .dataURL
+                            }
+                            alt=""
+                          />
+                        </div>
+                        {this.state.selectedProduct.productImages.map(
+                          (image, index) => (
+                            <div
+                              id={`pro-${index + 1}`}
+                              class={`tab-pane fade ${
+                                index === 1 ? "show active" : ""
+                              }`}
+                            >
+                              <img src={image.dataURL} alt="" />
+                            </div>
+                          )
+                        )}
+
+                        <div id="pro-3" class="tab-pane fade">
+                          <img
+                            src={
+                              this.state.selectedProduct.productImages[1]
+                                .dataURL
+                            }
+                            alt=""
+                          />
+                        </div>
+                        <div id="pro-4" class="tab-pane fade">
+                          <img
+                            src={
+                              this.state.selectedProduct.productImages[1]
+                                .dataURL
+                            }
+                            alt=""
+                          />
+                        </div>
                       </div>
-                      <div id="pro-2" class="tab-pane fade">
-                        <img
-                          src="assets/img/product/quickview-l2.webp"
-                          alt=""
-                        />
-                      </div>
-                      <div id="pro-3" class="tab-pane fade">
-                        <img
-                          src="assets/img/product/quickview-l3.webp"
-                          alt=""
-                        />
-                      </div>
-                      <div id="pro-4" class="tab-pane fade">
-                        <img
-                          src="assets/img/product/quickview-l2.webp"
-                          alt=""
-                        />
+                      {/* Thumbnail Large Image End */}
+                      {/* Thumbnail Image End */}
+                      <div class="quickview-wrap mt-15">
+                        <div
+                          class="quickview-slide-active owl-carousel nav nav-style-1"
+                          role="tablist"
+                        >
+                          <a class="active" data-bs-toggle="tab" href="#pro-1">
+                            <img
+                              src={
+                                this.state.selectedProduct.productImages[1]
+                                  .dataURL
+                              }
+                              alt=""
+                            />
+                          </a>
+                          <a data-bs-toggle="tab" href="#pro-2">
+                            <img
+                              src={
+                                this.state.selectedProduct.productImages[1]
+                                  .dataURL
+                              }
+                              alt=""
+                            />
+                          </a>
+                          <a data-bs-toggle="tab" href="#pro-3">
+                            <img
+                              src={
+                                this.state.selectedProduct.productImages[1]
+                                  .dataURL
+                              }
+                              alt=""
+                            />
+                          </a>
+                          <a data-bs-toggle="tab" href="#pro-4">
+                            <img
+                              src={
+                                this.state.selectedProduct.productImages[1]
+                                  .dataURL
+                              }
+                              alt=""
+                            />
+                          </a>
+                        </div>
                       </div>
                     </div>
-                    {/* Thumbnail Large Image End */}
-                    {/* Thumbnail Image End */}
-                    <div class="quickview-wrap mt-15">
+                    {/* {this.state.products
+                    .filter((prod) => prod.categoryName === "Four Wheeler")
+                    .map((prod, index) => ( */}
+                    {this.state.selectedProduct && (
                       <div
-                        class="quickview-slide-active owl-carousel nav nav-style-1"
-                        role="tablist"
+                        class="col-md-7 col-sm-12 col-xs-12"
+                        onClick={() =>
+                          this.fetchProductDetails(this.state.selectedProduct)
+                        }
                       >
-                        <a class="active" data-bs-toggle="tab" href="#pro-1">
-                          <img
-                            src="assets/img/product/quickview-s1.webp"
-                            alt=""
-                          />
-                        </a>
-                        <a data-bs-toggle="tab" href="#pro-2">
-                          <img
-                            src="assets/img/product/quickview-s2.webp"
-                            alt=""
-                          />
-                        </a>
-                        <a data-bs-toggle="tab" href="#pro-3">
-                          <img
-                            src="assets/img/product/quickview-s3.webp"
-                            alt=""
-                          />
-                        </a>
-                        <a data-bs-toggle="tab" href="#pro-4">
-                          <img
-                            src="assets/img/product/quickview-s2.webp"
-                            alt=""
-                          />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-7 col-sm-12 col-xs-12">
-                    <div class="product-details-content quickview-content">
-                      <h2>Products Name Here</h2>
-                      <div class="product-details-price">
-                        <span>&#8377;18.00 </span>
-                        <span class="old">&#8377;20.00 </span>
-                      </div>
-                      <div class="pro-details-rating-wrap">
-                        <div class="pro-details-rating">
-                          <i class="fa fa-star-o yellow"></i>
-                          <i class="fa fa-star-o yellow"></i>
-                          <i class="fa fa-star-o yellow"></i>
-                          <i class="fa fa-star-o"></i>
-                          <i class="fa fa-star-o"></i>
-                        </div>
-                        <span>3 Reviews</span>
-                      </div>
-                      <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisic elit
-                        eiusm tempor incidid ut labore et dolore magna aliqua.
-                        Ut enim ad minim venialo quis nostrud exercitation
-                        ullamco
-                      </p>
-                      <div class="pro-details-list">
-                        <ul>
-                          <li>- 0.5 mm Dail</li>
-                          <li>- Inspired vector icons</li>
-                          <li>- Very modern style </li>
-                        </ul>
-                      </div>
-                      <div class="pro-details-size-color">
-                        <div class="pro-details-color-wrap">
-                          <span>Color</span>
-                          <div class="pro-details-color-content">
+                        <div class="product-details-content quickview-content">
+                          <h2>{this.state.selectedProduct.brandName}</h2>
+                          <div class="product-details-price">
+                            <span>
+                              &#8377;{this.state.selectedProduct.productPrice}
+                            </span>
+                            <span class="old">
+                              &#8377;
+                              {this.state.selectedProduct.productMrpPrice}
+                            </span>
+                          </div>
+                          <div class="pro-details-rating-wrap">
+                            <div class="pro-details-rating">
+                              <i class="fa fa-star-o yellow"></i>
+                              <i class="fa fa-star-o yellow"></i>
+                              <i class="fa fa-star-o yellow"></i>
+                              <i class="fa fa-star-o"></i>
+                              <i class="fa fa-star-o"></i>
+                            </div>
+                            <span>3 Reviews</span>
+                          </div>
+                          <p>
+                            {this.state.selectedProduct.categoryName}
+                            <br />
+                            {this.state.selectedProduct.subCategoryName}
+                            <br />
+                            {this.state.selectedProduct.productName}
+                          </p>
+                          <div class="pro-details-list">
                             <ul>
-                              <li class="blue"></li>
-                              <li class="maroon active"></li>
-                              <li class="gray"></li>
-                              <li class="green"></li>
-                              <li class="yellow"></li>
-                              <li class="white"></li>
+                              <li> {this.state.selectedProduct.tyreSize}</li>
+                              {/* <li>- Inspired vector icons</li>
+                              <li>- Very modern style </li> */}
+                            </ul>
+                          </div>
+                          <div class="pro-details-size-color">
+                            <div class="pro-details-color-wrap">
+                              {/* <span>Color</span> */}
+                              <div class="pro-details-color-content">
+                                <ul>{/* <li class="black"></li> */}</ul>
+                              </div>
+                            </div>
+                            <div class="pro-details-size">
+                              {/* <span>Size</span> */}
+                              {/* <div class="pro-details-size-content">
+                                <ul>
+                                  <li>
+                                    <a href="#">s</a>
+                                  </li>
+                                  <li>
+                                    <a href="#">m</a>
+                                  </li>
+                                  <li>
+                                    <a href="#">l</a>
+                                  </li>
+                                  <li>
+                                    <a href="#">xl</a>
+                                  </li>
+                                  <li>
+                                    <a href="#">xxl</a>
+                                  </li>
+                                </ul>
+                              </div> */}
+                            </div>
+                          </div>
+                          <div class="pro-details-quality">
+                            <div class="cart-plus-minus">
+                              <input
+                                class="cart-plus-minus-box"
+                                type="text"
+                                name="qtybutton"
+                                value="2"
+                              />
+                            </div>
+                            <div class="pro-details-cart btn-hover">
+                              <a
+                                href="#"
+                                onClick={() =>
+                                  this.handleAddToCart(
+                                    this.state.selectedProduct
+                                  )
+                                }
+                              >
+                                Add To Cart
+                              </a>
+                            </div>
+                            <div class="pro-details-wishlist">
+                              <a href="#">
+                                <i class="fa fa-heart-o"></i>
+                              </a>
+                            </div>
+                            <div class="pro-details-compare">
+                              <a href="#">
+                                <i class="pe-7s-shuffle"></i>
+                              </a>
+                            </div>
+                          </div>
+                          {/* <div class="pro-details-meta">
+                            <span>Categories :</span>
+                            <ul>
+                              <li>
+                                <a href="#">Minimal,</a>
+                              </li>
+                              <li>
+                                <a href="#"></a>
+                              </li>
+                              <li>
+                                <a href="#"></a>
+                              </li>
+                            </ul>
+                          </div> */}
+                          {/* <div class="pro-details-meta">
+                            <span>Tag :</span>
+                            <ul>
+                              <li>
+                                <a href="#"> </a>
+                              </li>
+                              <li>
+                                <a href="#"></a>
+                              </li>
+                              <li>
+                                <a href="#"></a>
+                              </li>
+                            </ul>
+                          </div> */}
+                          <div class="pro-details-social">
+                            <ul>
+                              <li>
+                                <a href="https://www.facebook.com/ASHMI6oo7/">
+                                  <i class="fa fa-facebook"></i>
+                                </a>
+                              </li>
+                              <li>
+                                <a href="https://www.youtube.com/@ashwin0401">
+                                  <i class="fa fa-youtube"></i>
+                                </a>
+                              </li>
+                              <li>
+                                <a href="#">
+                                  <i class="fa fa-twitter"></i>
+                                </a>
+                              </li>
+                              <br />
+                              <li>
+                                <a href="https://www.linkedin.com/in/ashwini-kumar-maurya-531554205/">
+                                  <i class="fa fa-linkedin"></i>
+                                </a>
+                              </li>
                             </ul>
                           </div>
                         </div>
-                        <div class="pro-details-size">
-                          <span>Size</span>
-                          <div class="pro-details-size-content">
-                            <ul>
-                              <li>
-                                <a href="#">s</a>
-                              </li>
-                              <li>
-                                <a href="#">m</a>
-                              </li>
-                              <li>
-                                <a href="#">l</a>
-                              </li>
-                              <li>
-                                <a href="#">xl</a>
-                              </li>
-                              <li>
-                                <a href="#">xxl</a>
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
                       </div>
-                      <div class="pro-details-quality">
-                        <div class="cart-plus-minus">
-                          <input
-                            class="cart-plus-minus-box"
-                            type="text"
-                            name="qtybutton"
-                            value="2"
-                          />
-                        </div>
-                        <div class="pro-details-cart btn-hover">
-                          <a href="#">Add To Cart</a>
-                        </div>
-                        <div class="pro-details-wishlist">
-                          <a href="#">
-                            <i class="fa fa-heart-o"></i>
-                          </a>
-                        </div>
-                        <div class="pro-details-compare">
-                          <a href="#">
-                            <i class="pe-7s-shuffle"></i>
-                          </a>
-                        </div>
-                      </div>
-                      <div class="pro-details-meta">
-                        <span>Categories :</span>
-                        <ul>
-                          <li>
-                            <a href="#">Minimal,</a>
-                          </li>
-                          <li>
-                            <a href="#">Furniture,</a>
-                          </li>
-                          <li>
-                            <a href="#">Fashion</a>
-                          </li>
-                        </ul>
-                      </div>
-                      <div class="pro-details-meta">
-                        <span>Tag :</span>
-                        <ul>
-                          <li>
-                            <a href="#">Fashion, </a>
-                          </li>
-                          <li>
-                            <a href="#">Furniture,</a>
-                          </li>
-                          <li>
-                            <a href="#">Electronic</a>
-                          </li>
-                        </ul>
-                      </div>
-                      <div class="pro-details-social">
-                        <ul>
-                          <li>
-                            <a href="#">
-                              <i class="fa fa-facebook"></i>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <i class="fa fa-dribbble"></i>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <i class="fa fa-pinterest-p"></i>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <i class="fa fa-twitter"></i>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <i class="fa fa-linkedin"></i>
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

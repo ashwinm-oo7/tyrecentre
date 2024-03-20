@@ -36,3 +36,16 @@
 .product-list th:last-child, .product-list td:last-child {
     border-right: none;
 }
+
+@media only screen and (max-width: 600px) {
+  .product-list th:nth-child(7), .product-list td:nth-child(7),
+  .product-list th:nth-child(2), .product-list td:nth-child(2),
+  .product-list th:nth-child(8), .product-list td:nth-child(8) {
+    display: none;
+  }
+
+  .product-list th:nth-child(3),
+  .product-list td:nth-child(3) {
+    font-size: 13px;
+  }
+}

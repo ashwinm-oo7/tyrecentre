@@ -17,13 +17,15 @@ import AddProduct from "./components/AddProduct";
 import ProductList from "./components/ProductList";
 import PunctureRepair from "./components/PunctureRepair";
 import PunctureRepairList from "./components/PunctureRepairList";
+import Feedback from "./components/Feedback";
+import MyAccount from "./components/MyAccount";
 
 class Home extends React.Component {
   render() {
     return (
       <div className="app">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/#" element={<HomePage />} />
           <Route path="login" element={<Login />} />
           <Route path="sign-up" element={<SignUp />} />
           <Route path="home" element={<HomePage />} />
@@ -37,6 +39,8 @@ class Home extends React.Component {
           <Route path="product-list" element={<ProductList />} />
           <Route path="puncture-repair" element={<PunctureRepair />} />
           <Route path="puncture-repair-list" element={<PunctureRepairList />} />
+          <Route path="feedback-list" element={<Feedback />} />
+          <Route path="myAccount" element={<MyAccount />} />
         </Routes>
         <ToastContainer />
       </div>

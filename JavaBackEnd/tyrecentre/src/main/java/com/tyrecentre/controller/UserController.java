@@ -4,7 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -63,5 +66,52 @@ class UserController {
         }
     }
 
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<?> getProfile(@PathVariable @NonNull String id) {
+        try {
+            // Find customer by ID
+            Customer customer = customerRepo.findById(id).orElse(null);
+            if (customer != null) {
+                // Return customer profile details
+                return new ResponseEntity<>(customer, HttpStatus.OK);
+            } else {
+                // Customer not found
+                return new ResponseEntity<>("Customer not found", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            // Error occurred while fetching profile
+            return new ResponseEntity<>("Failed to fetch profile. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     
+    @PutMapping("/profile/update/{id}")
+    public ResponseEntity<?> updateProfile(@PathVariable @NonNull String id, @RequestBody Customer updatedCustomer) {
+        try {
+            // Find customer by ID
+            Customer existingCustomer = customerRepo.findById(id).orElse(null);
+            if (existingCustomer != null) {
+                // Update customer profile details
+                existingCustomer.setFirstName(updatedCustomer.getFirstName());
+                existingCustomer.setLastName(updatedCustomer.getLastName());
+                existingCustomer.setAddress(updatedCustomer.getAddress());
+                existingCustomer.setPhoneNumber(updatedCustomer.getPhoneNumber());
+                existingCustomer.setAge(updatedCustomer.getAge());
+                existingCustomer.setGender(updatedCustomer.getGender());
+                
+                // Save the updated customer to the database
+                Customer savedCustomer = customerRepo.save(existingCustomer);
+                
+                // Return the updated customer profile
+                return new ResponseEntity<>(savedCustomer, HttpStatus.OK);
+            } else {
+                // Customer not found
+                return new ResponseEntity<>("Customer not found", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            // Error occurred while updating profile
+            return new ResponseEntity<>("Failed to update profile. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
+    
+

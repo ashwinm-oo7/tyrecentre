@@ -8,7 +8,7 @@ import {
   FaEnvelope,
   FaTools,
 } from "react-icons/fa";
-import tyreLogo from "../icons/tyrelogo.png";
+import tyreLogo from "../icons/tyrelogo.jpg";
 import { toast } from "react-toastify";
 import "../css/login.css";
 export default class Login extends Component {
@@ -22,96 +22,92 @@ export default class Login extends Component {
 
   render() {
     return (
-      <div className="login-container">
-        <div className="form-wrapper">
-          <form>
-            <img
-              height={100}
-              width={100}
-              src={tyreLogo}
-              alt="Tyre Logo"
-              className="tyre-logo"
-            />
-            <h3>
-              <FaUserLock style={{ marginRight: "5px" }} />
-              Login In
-            </h3>
-            <div className="mb-3">
-              <label>
-                <FaEnvelope style={{ marginRight: "5px" }} />
-                Email address
-              </label>
-              <input
-                type="email"
-                className="form-control"
-                placeholder="Enter email"
-                name="email" // Added name attribute
-                value={this.state.email}
-                onChange={(e) => this.setState({ email: e.target.value })}
-              />
-            </div>
-
-            <div className="mb-3">
-              <label>
-                <FaLock style={{ marginRight: "5px" }} />
-                Password
-              </label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Enter password"
-                name="password" // Added name attribute
-                value={this.state.password}
-                onChange={(e) => this.setState({ password: e.target.value })}
-              />
-            </div>
-
-            <div className="mb-3">
-              <div className="custom-control custom-checkbox">
-                <input
-                  type="checkbox"
-                  className="custom-control-input"
-                  id="customCheck1"
-                />
-                <label className="custom-control-label" htmlFor="customCheck1">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="d-grid">
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  onClick={this.login.bind(this)}
-                >
-                  Submit
-                </button>
-              </div>
-            </div>
-            {this.state.showForgotPasswordForm ? (
-              this.renderForgotPasswordForm()
-            ) : (
-              <p className="forgot-password text-right">
-                {/* Forgot <a href="#" onClick={this.handleForgotPassword}>password?</a> */}
-              </p>
-            )}
-            <p className="new-user-signup">
-              <FaUserPlus style={{ marginRight: "5px" }} />
-
-              <Link to="/puncture-repair">Instant Puncture Service</Link>
-            </p>
-
-            <p className="new-user-signup">
-              <FaUserPlus style={{ marginRight: "5px" }} />
-              New User : <Link to="/sign-up">signup</Link>
-            </p>
-            <p className="forgot-password text-right">
-              <FaHome style={{ marginRight: "5px" }} />
-              <a href="/tyrecentre/#/home">Home</a>
-            </p>
-          </form>
+      <form>
+        <img
+          height={100}
+          width={100}
+          src={tyreLogo}
+          alt="Tyre Logo"
+          className="tyre-logo"
+        />
+        <h3>
+          <FaUserLock style={{ marginRight: "5px" }} />
+          Login In
+        </h3>
+        <div className="mb-3">
+          <label>
+            <FaEnvelope style={{ marginRight: "5px" }} />
+            Email address
+          </label>
+          <input
+            type="email"
+            className="form-control"
+            placeholder="Enter email"
+            name="email" // Added name attribute
+            value={this.state.email}
+            onChange={(e) => this.setState({ email: e.target.value })}
+          />
         </div>
-      </div>
+
+        <div className="mb-3">
+          <label>
+            <FaLock style={{ marginRight: "5px" }} />
+            Password
+          </label>
+          <input
+            type="password"
+            className="form-control"
+            placeholder="Enter password"
+            name="password" // Added name attribute
+            value={this.state.password}
+            onChange={(e) => this.setState({ password: e.target.value })}
+          />
+        </div>
+
+        <div className="mb-3">
+          <div className="custom-control custom-checkbox">
+            <input
+              type="checkbox"
+              className="custom-control-input"
+              id="customCheck1"
+            />
+            <label className="custom-control-label" htmlFor="customCheck1">
+              Remember me
+            </label>
+          </div>
+
+          <div className="d-grid">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              onClick={this.login.bind(this)}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+        {this.state.showForgotPasswordForm ? (
+          this.renderForgotPasswordForm()
+        ) : (
+          <p className="forgot-password text-right">
+            {/* Forgot <a href="#" onClick={this.handleForgotPassword}>password?</a> */}
+          </p>
+        )}
+        <p className="new-user-signup">
+          <FaUserPlus style={{ marginRight: "5px" }} />
+
+          <Link to="/puncture-repair">Instant Puncture Service</Link>
+        </p>
+
+        <p className="new-user-signup">
+          <FaUserPlus style={{ marginRight: "5px" }} />
+          New User : <Link to="/sign-up">signup</Link>
+        </p>
+        <p className="forgot-password text-right">
+          <FaHome style={{ marginRight: "5px" }} />
+          <a href="/tyrecentre/#/home">Home</a>
+        </p>
+      </form>
     );
   }
   renderForgotPasswordForm() {
@@ -268,12 +264,15 @@ export default class Login extends Component {
       if (response.ok) {
         console.log(loginData);
         console.log("User LOGIN successfully");
-        // window.location = "http://localhost:3000/home";
+        // window.location = "http://localhost:3000/tyrecentre/#/home";
         window.location = "https://ashwinm-oo7.github.io/tyrecentre/#/home";
+        localStorage.setItem("userId", loginData.id);
+        localStorage.setItem("firstName", loginData.firstName);
+        localStorage.setItem("lastName", loginData.lastName);
         localStorage.setItem("userEmail", loginData.email);
         localStorage.setItem("isAdmin", loginData.admin);
 
-        toast.success("Logged in successfully");
+        toast.success("Logged in successfully", 200);
       } else {
         toast.warning("Incorrect Credentials");
         console.error("Failed to LOGIN user");

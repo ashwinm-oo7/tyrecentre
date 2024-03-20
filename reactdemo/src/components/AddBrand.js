@@ -157,9 +157,16 @@ class AddBrand extends Component {
             ADD PRODUCT{" "}
           </button>
         </div>
+        {this.state.activeTab === "ADD-PRODUCT" && (
+          <div>
+            <AddProduct />
+          </div>
+        )}
         <div className="tab-content">
-          {this.state.activeTab === "CATEGORY" && (
-            <div>{/* <Categories /> */}</div>
+          {this.state.activeTab === "Categories" && (
+            <div>
+              <Categories />
+            </div>
           )}
 
           {this.state.activeTab === "SUBCATEGORY" && (
@@ -171,7 +178,7 @@ class AddBrand extends Component {
           {this.state.activeTab === "ADD-BRAND" && (
             <div>
               <label>
-                Category :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                Category :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <select
                   value={this.state.selectedCategory}
                   onChange={this.handleCategoryChange}
@@ -186,7 +193,7 @@ class AddBrand extends Component {
               </label>
 
               <label>
-                Subcategory :
+                Subcategory :&nbsp;&nbsp;
                 <select
                   value={this.state.selectedSubCategory}
                   onChange={(e) =>
@@ -236,18 +243,7 @@ class AddBrand extends Component {
               <Link to="/categories">Back</Link>
             </div>
           )}
-
-          {this.state.activeTab === "ADD-PRODUCT" && (
-            <div>
-              <AddProduct />
-            </div>
-          )}
         </div>
-        {this.state.activeTab === "Categories" && (
-          <div>
-            <Categories />
-          </div>
-        )}
       </div>
     );
   }

@@ -46,6 +46,7 @@ form {
   .tyre-logo {
     display: block;
     margin: 0 auto 20px; /* Center the logo and add bottom margin */
+    height: 50px;
   }
   
   /* Form header */

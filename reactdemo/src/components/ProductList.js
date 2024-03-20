@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import "../css/ProductList.css";
 import { FaPencilAlt, FaTrash } from "react-icons/fa"; // Import pencil icon from react-icons library
+import { Link } from "react-router-dom";
 import EditProductModal from "./EditProductModal.js";
 // Import the popup/modal component
 
@@ -99,11 +100,12 @@ class ProductList extends Component {
                 <td>{product.manufacturer}</td>
                 <td>{product.productDescription}</td>
                 <td>
-                  <a href={`/add-product?id=${product.id}`}>
-                    {" "}
-                    <i class="fa fa-pencil"></i>
-                  </a>
-                  {/* <FaPencilAlt onClick={() => this.handleEdit(product)} /> */}
+                  {/* <a href={`/tyrecentre/#/add-product?id=${product.id}`}> */}
+                  {/* <i class="fa fa-pencil"></i> */}
+                  <Link to={`/add-product?id=${product.id}&id=${product.id}`}>
+                    <FaPencilAlt onClick={() => this.handleEdit(product)} />
+                  </Link>
+                  {/* </a> */}
                 </td>
 
                 {/* Add more cells for additional details */}
@@ -111,102 +113,15 @@ class ProductList extends Component {
             ))}
           </tbody>
         </table>
+        {/* {isEditModalOpen && (
+          <EditProductModal
+            product={selectedProduct}
+            onSave={this.handleSaveChanges}
+            onClose={this.handleModalClose}
+          />
+        )} */}
       </div>
     );
   }
 }
-
 export default ProductList;
-
-// import React, { Component } from 'react';
-// import axios from 'axios';
-// import '../css/ProductList.css';
-
-// class ProductList extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       products: [],
-//       editedProduct: null
-//     };
-//     this.fetchAllProducts();
-//   }
-
-//   fetchAllProducts = async () => {
-//     try {
-//       const response = await axios.get('http://localhost:8080/product/getAllProducts');
-//       console.log('fetchAllProducts Response:', response.data);
-//       this.setState({ products: response.data });
-//     } catch (error) {
-//       console.error('Error fetching products:', error);
-//     }
-//   };
-
-//   handleEdit = (productIndex, field) => {
-//     this.setState({ editedProduct: { index: productIndex, field: field } });
-//   };
-
-//   handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     const { index, field } = this.state.editedProduct;
-//     const updatedProducts = [...this.state.products];
-//     updatedProducts[index][field] = value;
-//     this.setState({ products: updatedProducts });
-//   };
-
-//   handleUpdate = async () => {
-//     const updatedProduct = this.state.products[this.state.editedProduct.index];
-//     try {
-//       await axios.put(`http://localhost:8080/product/updateProduct/${updatedProduct.id}`, updatedProduct);
-//       this.setState({ editedProduct: null });
-//       console.log('Product updated successfully');
-//     } catch (error) {
-//       console.error('Error updating product:', error);
-//     }
-//   };
-
-//   render() {
-//     return (
-//       <div className="product-list">
-//         <table>
-//           <thead>
-//             <tr>
-//               <th>Image</th>
-//               <th>Category</th>
-//               <th>SubCategory</th>
-//               <th>Brand</th>
-//               <th>Price</th>
-//               <th>Quantity</th>
-//               <th>SKU Code</th>
-//               <th>Manufacturer</th>
-//               <th>Description</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {this.state.products.map((product, index) => (
-//               <tr key={index}>
-//                 <td><img src={product.productImages[0].dataURL} alt={product.productName} /></td>
-//                 <td><input type="text" value={product.categoryName} name="categoryName" onChange={this.handleInputChange} /></td>
-//                 <td><input type="text" value={product.subCategoryName} name="subCategoryName" onChange={this.handleInputChange} /></td>
-//                 <td><input type="text" value={product.brandName} name="brandName" onChange={this.handleInputChange} /></td>
-//                 <td><input type="number" value={product.productPrice} name="productPrice" onChange={this.handleInputChange} /></td>
-//                 <td><input type="number" value={product.productQuantity} name="productQuantity" onChange={this.handleInputChange} /></td>
-//                 <td><input type="text" value={product.skuCode} name="skuCode" onChange={this.handleInputChange} /></td>
-//                 <td><input type="text" value={product.manufacturer} name="manufacturer" onChange={this.handleInputChange} /></td>
-//                 <td><input type="text" value={product.productDescription} name="productDescription" onChange={this.handleInputChange} /></td>
-//                 <td>
-//                   {this.state.editedProduct && this.state.editedProduct.index === index && (
-//                     <button onClick={this.handleUpdate}>Update</button>
-//                   )}
-//                   {!this.state.editedProduct && <button onClick={() => this.handleEdit(index, 'categoryName')}>Edit</button>}
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-//     );
-//   }
-// }
-
-// export default ProductList;
