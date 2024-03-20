@@ -25,7 +25,7 @@ class Home extends React.Component {
     return (
       <div className="app">
         <Routes>
-          <Route path="/#" element={<HomePage />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="login" element={<Login />} />
           <Route path="sign-up" element={<SignUp />} />
           <Route path="home" element={<HomePage />} />
