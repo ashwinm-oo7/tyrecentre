@@ -909,14 +909,17 @@ export default class HomePage extends Component {
                                   <i class="pe-7s-like"></i>
                                 </a>
                               </div>
+                              {/* 000 */}
                               <div class="pro-same-action pro-cart">
-                                <button
+                                <a
                                   onClick={() => this.handleAddToCart(prod)}
                                   title="Add To Cart"
                                 >
                                   <i class="pe-7s-cart"></i> Add to cart
-                                </button>
+                                </a>
                               </div>
+
+                              {/* 000 */}
                               <div class="pro-same-action pro-quickview">
                                 <a
                                   title="Quick View"
@@ -992,12 +995,12 @@ export default class HomePage extends Component {
                                 </a>
                               </div>
                               <div class="pro-same-action pro-cart">
-                                <button
+                                <a
                                   onClick={() => this.handleAddToCart(prod)}
                                   title="Add To Cart"
                                 >
                                   <i class="pe-7s-cart"></i> Add to cart
-                                </button>
+                                </a>
                               </div>
                               <div class="pro-same-action pro-quickview">
                                 <a
@@ -1073,11 +1076,19 @@ export default class HomePage extends Component {
                                   <i class="pe-7s-like"></i>
                                 </a>
                               </div>
+                              {/* 0000 */}
+
                               <div class="pro-same-action pro-cart">
-                                <a title="Add To Cart" href="#">
+                                <a
+                                  onClick={() => this.handleAddToCart(prod)}
+                                  title="Add To Cart"
+                                  href="#"
+                                >
                                   <i class="pe-7s-cart"></i> Add to cart
                                 </a>
                               </div>
+
+                              {/* 000 */}
                               <div class="pro-same-action pro-quickview">
                                 <a
                                   title="Quick View"
