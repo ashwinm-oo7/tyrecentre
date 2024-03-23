@@ -23,9 +23,7 @@ class PunctureRepairList extends Component {
       totalAmount: 0,
     };
 
-    const hash = window.location.hash.substr(1); // Remove the leading '#'
-    console.log(hash);
-    const params = new URLSearchParams(hash);
+    const params = new URLSearchParams(window.location.search);
     console.log(params.get("isAdmin"));
     this.state.mobileNumber = params.get("mob");
     this.state.isAdmin = params.get("isAdmin");
@@ -93,12 +91,10 @@ class PunctureRepairList extends Component {
       }));
 
       console.log(this.state.totalAmount);
-      // Update the total amount in the state
-      // this.setState({ totalAmount });
 
       await axios.put(
         process.env.REACT_APP_API_URL +
-          `punctureRepair/updateRepairStatus/${id}/${status}}`,
+          `punctureRepair/updateRepairStatus/${id}/${status}`,
         { status }
       );
     } catch (error) {

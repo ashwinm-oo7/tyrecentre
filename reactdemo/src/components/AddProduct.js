@@ -45,10 +45,8 @@ class AddProduct extends Component {
       vehicleBrandModels: [],
       tyreSize: "",
     };
-    this.state.productIdToUpdate = ""; // logic to get data from URL
-    const hash = window.location.hash.substr(1); // Remove the leading '#'
-    console.log(hash);
-    const params = new URLSearchParams(hash);
+    this.state.productIdToUpdate = "";
+    const params = new URLSearchParams(window.location.search);
     this.state.productIdToUpdate = params.get("id");
     console.log("ID FROM URL : ", this.state.productIdToUpdate);
     if (this.state.productIdToUpdate) {

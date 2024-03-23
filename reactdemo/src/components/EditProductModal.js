@@ -22,9 +22,6 @@ const EditProductModal = ({ productId, onSave, onClose }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Perform update operation here
-    // Example:
-    // await axios.put(`http://localhost:8080/product/${productId}`, product);
     onSave(product);
     onClose();
   };

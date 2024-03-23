@@ -101,28 +101,23 @@ export default class SignUp extends Component {
         </div>
         <p className="forgot-password text-right">
           Already registered{" "}
-          <a href="/tyrecentre/#/login">
+          <a href="/login">
             <FaSignInAlt style={{ marginRight: "5px" }} />
             sign in?
           </a>
         </p>
         <p className="forgot-password text-right">
-          <a href="/tyrecentre/#/home">
+          <a href="/home">
             <FaHome style={{ marginRight: "5px" }} />
             Home
           </a>
         </p>
       </form>
-      // </div>
-      // </div>
     );
   }
   signUp = async (e) => {
     e.preventDefault();
     console.log("HELLLO : ", this.state);
-
-    //api call
-    //http://localhost:8080/tyrecentre/save
 
     try {
       const response = await fetch(

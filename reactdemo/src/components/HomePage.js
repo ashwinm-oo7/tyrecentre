@@ -122,8 +122,8 @@ export default class HomePage extends Component {
 
   logout() {
     localStorage.clear();
-    window.location = "http://localhost:3000/tyrecentre/#/login";
-    // window.location = "https://ashwinm-oo7.github.io/tyrecentre/#/login";
+    window.location = "http://localhost:3000/login";
+    // window.location = "https://ashwinm-oo7.github.io/login";
   }
   handleAddToCart = (product) => {
     const updatedCart = [...this.state.cart, product];
@@ -309,11 +309,11 @@ export default class HomePage extends Component {
                         <ul class="submenu">
                           <li>
                             <p>
-                              <a href="/tyrecentre/#/login">login / register</a>
+                              <a href="/login">login / register</a>
                             </p>
                           </li>
                           <li>
-                            <a href="/tyrecentre/#/about">about us</a>
+                            <a href="/about">about us</a>
                           </li>
                           <li>
                             <a href="#">cart page</a>
@@ -325,7 +325,7 @@ export default class HomePage extends Component {
                             <a href="#">wishlist </a>
                           </li>
                           <li>
-                            <a href="/tyrecentre/#/myAccount">My Account</a>
+                            <a href="/myAccount">My Account</a>
                           </li>
                           <li>
                             <a href="#">contact us </a>
@@ -361,15 +361,15 @@ export default class HomePage extends Component {
                         </ul>
                       </li> */}
                       {/* <li>
-                        <a href="/tyrecentre/#/about"> About </a>
+                        <a href="/about"> About </a>
                       </li> */}
                       {/* <li>
-                        <a href="/tyrecentre/#/categories">
+                        <a href="/categories">
                           Categories <i class="fa fa-angle-down"></i>
                         </a>
                         <ul class="submenu">
                           <li>
-                            <a href="/tyrecentre/#/CategoryList">
+                            <a href="/CategoryList">
                               CategoryList
                             </a>
                           </li>
@@ -398,27 +398,21 @@ export default class HomePage extends Component {
                           </a>
                           <ul class="submenu">
                             <li>
-                              <a href="/tyrecentre/#/add-brand">Add Brand</a>
+                              <a href="/add-brand">Add Brand</a>
                             </li>
                             <li>
-                              <a href="/tyrecentre/#/CategoryList">
-                                CategoryList
-                              </a>
+                              <a href="/CategoryList">CategoryList</a>
                             </li>
                             <li>
-                              <a href="/tyrecentre/#/puncture-repair-list?isAdmin=true&isAdmin=true">
+                              <a href="/puncture-repair-list?isAdmin=true">
                                 Puncture Repair List
                               </a>
                             </li>
                             <li>
-                              <a href="/tyrecentre/#/product-list">
-                                Product List
-                              </a>
+                              <a href="/product-list">Product List</a>
                             </li>
                             <li>
-                              <a href="/tyrecentre/#/feedback-list">
-                                Feedback List
-                              </a>
+                              <a href="/feedback-list">Feedback List</a>
                             </li>
                           </ul>
                         </li>
@@ -461,10 +455,7 @@ export default class HomePage extends Component {
                       <div class="account-dropdown">
                         <ul>
                           <li>
-                            <a
-                              onClick={() => this.logout()}
-                              href="/tyrecentre/#/login"
-                            >
+                            <a onClick={() => this.logout()} href="/login">
                               {localStorage.getItem("userEmail")
                                 ? "Logout"
                                 : "Login"}{" "}
@@ -472,7 +463,7 @@ export default class HomePage extends Component {
                           </li>
 
                           <li>
-                            <a href="/tyrecentre/#/sign-up">Register</a>
+                            <a href="/sign-up">Register</a>
                           </li>
                           <li>
                             <a href="#">Wishlist </a>
@@ -491,10 +482,7 @@ export default class HomePage extends Component {
                       <div class="account-dropdown">
                         <ul>
                           <li>
-                            <a
-                              onClick={() => this.logout()}
-                              href="/tyrecentre/#/login"
-                            >
+                            <a onClick={() => this.logout()} href="/login">
                               {localStorage.getItem("userEmail")
                                 ? "Logout"
                                 : "Login"}{" "}
@@ -502,7 +490,7 @@ export default class HomePage extends Component {
                           </li>
 
                           <li>
-                            <a href="/tyrecentre/#/sign-up">Register</a>
+                            <a href="/sign-up">Register</a>
                           </li>
                         </ul>
                       </div>
@@ -608,7 +596,7 @@ export default class HomePage extends Component {
                 <nav id="mobile-menu-active">
                   <ul class="menu-overflow">
                     <li>
-                      <a href="/tyrecentre/#/home">HOME</a>
+                      <a href="/home">HOME</a>
                       <ul>
                         <li>
                           <a href="#">Collection</a>
@@ -699,10 +687,10 @@ export default class HomePage extends Component {
                         <a>Master Admin</a>
                         <ul>
                           <li>
-                            <a href="/tyrecentre/#/add-brand">Add Brand</a>
+                            <a href="/add-brand">Add Brand</a>
                           </li>
                           <li>
-                            <a href="/tyrecentre/#/puncture-repair-list?isAdmin=true&isAdmin=true">
+                            <a href="/puncture-repair-list?isAdmin=true&isAdmin=true">
                               Puncture Repair List
                             </a>
                           </li>
@@ -715,7 +703,7 @@ export default class HomePage extends Component {
                       <a>Pages</a>
                       <ul>
                         <li>
-                          <a href="/tyrecentre/#/about">about us</a>
+                          <a href="/about">about us</a>
                         </li>
                       </ul>
                     </li>
@@ -811,7 +799,7 @@ export default class HomePage extends Component {
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-sm-6">
-                <a href="/tyrecentre/#/puncture-repair">
+                <a href="/puncture-repair">
                   <div class="support-wrap mb-30 support-2">
                     <div class="support-icon">
                       <img
@@ -1164,7 +1152,7 @@ export default class HomePage extends Component {
                   <div class="footer-list">
                     <ul>
                       <li>
-                        <a href="/tyrecentre/#/about">About us</a>
+                        <a href="/about">About us</a>
                       </li>
                       <li>
                         <a href="/">Store location : Jogeshwari Mumbai(102)</a>

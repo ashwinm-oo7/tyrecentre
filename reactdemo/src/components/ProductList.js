@@ -100,7 +100,7 @@ class ProductList extends Component {
                 <td>{product.manufacturer}</td>
                 <td>{product.productDescription}</td>
                 <td>
-                  {/* <a href={`/tyrecentre/#/add-product?id=${product.id}`}> */}
+                  {/* <a href={`/add-product?id=${product.id}`}> */}
                   {/* <i class="fa fa-pencil"></i> */}
                   <Link to={`/add-product?id=${product.id}&id=${product.id}`}>
                     <FaPencilAlt onClick={() => this.handleEdit(product)} />

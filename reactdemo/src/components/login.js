@@ -6,7 +6,6 @@ import {
   FaHome,
   FaLock,
   FaEnvelope,
-  FaTools,
 } from "react-icons/fa";
 import tyreLogo from "../icons/tyrelogo.jpg";
 import { toast } from "react-toastify";
@@ -105,7 +104,7 @@ export default class Login extends Component {
         </p>
         <p className="forgot-password text-right">
           <FaHome style={{ marginRight: "5px" }} />
-          <a href="/tyrecentre/#/home">Home</a>
+          <a href="/">Home</a>
         </p>
       </form>
     );
@@ -242,9 +241,6 @@ export default class Login extends Component {
     e.preventDefault();
     console.log("HELLLO login : ", this.state);
 
-    //api call
-    //http://localhost:8080/tyrecentre/save
-
     try {
       const response = await fetch(
         process.env.REACT_APP_API_URL + "user/login",
@@ -264,8 +260,7 @@ export default class Login extends Component {
       if (response.ok) {
         console.log(loginData);
         console.log("User LOGIN successfully");
-        // window.location = "http://localhost:3000/tyrecentre/#/home";
-        window.location = "http://www.tyrewala.in:8080/tyrecentre/#/home";
+        window.location = process.env.REACT_APP_API_URL_FOR_GUI;
         localStorage.setItem("userId", loginData.id);
         localStorage.setItem("firstName", loginData.firstName);
         localStorage.setItem("lastName", loginData.lastName);
