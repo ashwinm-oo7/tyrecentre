@@ -122,7 +122,7 @@ export default class HomePage extends Component {
 
   logout() {
     localStorage.clear();
-    window.location = "http://localhost:3000/login";
+    window.location = process.env.REACT_APP_API_URL_FOR_GUI + "/login";
     // window.location = "https://ashwinm-oo7.github.io/login";
   }
   handleAddToCart = (product) => {
