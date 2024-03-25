@@ -38,6 +38,98 @@
 .feedback-form input[type="submit"]:hover {
   background-color: #177fed;
 }
+.shopping-cart-delete {
+  display: flex;
+  flex-direction: column; /* Display items vertically */
+  align-items: flex-start; /* Align items to the start of the container */
+  padding-left: 240px;
+}
+
+
+.shopping-cart-delete button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px; /* Adjust the margin as needed */
+}
+
+.shopping-cart-delete button i {
+  color: red; /* Change the color to red */
+  font-size: 18px; /* Adjust the font size */
+}
+
+.shopping-cart-delete button:hover i {
+  color: darkred; /* Change the color on hover */
+}
+
+.quantity-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.quantity-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+
+
+.quantity-button:hover {
+  color: #007bff; /* Change color on hover */
+}
+
+.quantity-button.plus {
+  margin-bottom: 5px; /* Adjust spacing between buttons */
+}
+
+.quantity-button.minus {
+  margin-bottom: 5px; /* Adjust spacing between buttons */
+}
+/* Styles for the quantity buttons */
+.quantity-button {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  text-align: center;
+  line-height: 30px;
+  cursor: pointer;
+}
+
+/* Styles for the minus button */
+.minus {
+  margin-right: 10px; /* Adjust as needed */
+}
+
+/* Styles for the plus button */
+.plus {
+  margin-left: 10px; 
+}
+
+/* Styles for the quantity display */
+.quantity-display {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border: 1px solid #ccc;
+  text-align: center;
+  line-height: 15px;
+  margin: 0 5px; /* Adjust as needed */
+}
+/* .quantity-display {
+  user-select: none; 
+  pointer-events: none; 
+} */
+
+.disabled {
+  opacity: 0.5; 
+  cursor: not-allowed; /* Change the cursor to indicate that the button is not clickable */
+}
+
+
 
 @media only screen and (max-width: 768px) {
     .slider-single-img img {

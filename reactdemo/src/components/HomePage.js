@@ -1,5 +1,5 @@
 import React, { Component, useState } from "react";
-import { FaBicycle, FaCar } from "react-icons/fa";
+import { FaBicycle, FaCar, FaMinus, FaPlus } from "react-icons/fa";
 import axios from "axios";
 import "../css/home.css";
 export default class HomePage extends Component {
@@ -17,11 +17,13 @@ export default class HomePage extends Component {
       searchResults: [],
       isFormVisible: false,
       feedback: "",
+      filteredProducts: [],
     };
     this.fetchAllProducts();
     this.fetchAllBikeProducts();
     this.handleAddToCart = this.handleAddToCart.bind(this);
     this.handleRemoveFromCart = this.handleRemoveFromCart.bind(this);
+    this.handleRemoveFromCart2 = this.handleRemoveFromCart2.bind(this);
     this.handleCheckout = this.handleCheckout.bind(this);
     this.fetchCartFromLocalStorage();
   }
@@ -125,15 +127,52 @@ export default class HomePage extends Component {
     window.location = process.env.REACT_APP_API_URL_FOR_GUI + "/login";
     // window.location = "https://ashwinm-oo7.github.io/login";
   }
+  // handleAddToCart = (product) => {
+  //   const updatedCart = [...this.state.cart, product];
+  //   this.setState({ cart: updatedCart }, () => {
+  //     this.saveCartToLocalStorage(updatedCart);
+  //   });
+  // };
+
   handleAddToCart = (product) => {
-    const updatedCart = [...this.state.cart, product];
-    this.setState({ cart: updatedCart }, () => {
-      this.saveCartToLocalStorage(updatedCart);
-    });
+    const { cart } = this.state;
+    const index = cart.findIndex((item) => item.id === product.id);
+    const availableQuantity = product.productQuantity;
+
+    if (index !== -1) {
+      // Product already exists in cart, update its quantity
+      const updatedCart = [...cart];
+      if (updatedCart[index].quantity < availableQuantity) {
+        updatedCart[index].quantity += 1;
+        updatedCart[index].amount =
+          updatedCart[index].quantity * updatedCart[index].productPrice;
+        this.setState({ cart: updatedCart }, () => {
+          this.saveCartToLocalStorage(updatedCart);
+        });
+      }
+    } else {
+      // Product is not in cart, add it as a new item
+      const newProduct = { ...product, quantity: 1, amount: product.price };
+      const updatedCart = [...cart, newProduct];
+      // const updatedCart = [...cart, { ...product, quantity: 1 }];
+      this.setState({ cart: updatedCart }, () => {
+        this.saveCartToLocalStorage(updatedCart);
+      });
+    }
+  };
+
+  isProductInCart = (product) => {
+    const { cart } = this.state;
+    return cart.some((item) => item.id === product.id);
+  };
+
+  getProductQuantity = (product) => {
+    const { cart } = this.state;
+    const index = cart.findIndex((item) => item.id === product.id);
+    return index !== -1 ? cart[index].quantity : 0;
   };
 
   handleRemoveFromCart(index) {
-    // Remove the item at the specified index from the cart
     const updatedCart = [...this.state.cart];
     updatedCart.splice(index, 1);
     this.setState({ cart: updatedCart }, () => {
@@ -141,15 +180,71 @@ export default class HomePage extends Component {
     });
   }
 
+  // handleRemoveFromCart2 = (index) => {
+  //   const { cart } = this.state;
+  //   const updatedCart = [...cart];
+  //   if (updatedCart[index].quantity > 1) {
+  //     updatedCart[index].quantity -= 1;
+  //     updatedCart[index].amount -= updatedCart[index].productPrice;
+  //   } else {
+  //     updatedCart.splice(index, 1);
+  //   }
+  //   this.setState({ cart: updatedCart }, () => {
+  //     this.saveCartToLocalStorage(updatedCart);
+  //   });
+  // };
+  // handleRemoveFromCart3 = (productToRemove) => {
+  //   const { cart } = this.state;
+  //   const index = cart.findIndex((item) => item.id === productToRemove.id);
+
+  //   if (index !== -1) {
+  //     const updatedCart = [...cart];
+  //     if (updatedCart[index].quantity > 1) {
+  //       updatedCart[index].quantity -= 1; // Decrement the quantity by 1
+  //       updatedCart[index].amount -= updatedCart[index].price; // Subtract the price from the total amount
+  //     } else {
+  //       updatedCart.splice(index, 1); // Remove the product if the quantity becomes 0
+  //     }
+
+  //     this.setState({ cart: updatedCart }, () => {
+  //       this.saveCartToLocalStorage(updatedCart);
+  //     });
+  //   }
+  // };
+
+  handleRemoveFromCart2 = (productToRemove) => {
+    const { cart } = this.state;
+    const updatedCart = [...cart];
+    const index = updatedCart.findIndex(
+      (item) => item.id === productToRemove.id
+    );
+
+    if (index !== -1) {
+      if (updatedCart[index].quantity > 1) {
+        // If the quantity is greater than 1, decrement the quantity and update the amount
+        updatedCart[index].quantity -= 1;
+        updatedCart[index].amount -= updatedCart[index].price;
+      } else {
+        // If the quantity is 1, remove the product from the cart
+        updatedCart.splice(index, 1);
+      }
+
+      this.setState({ cart: updatedCart }, () => {
+        this.saveCartToLocalStorage(updatedCart);
+      });
+    }
+  };
+
   calculateTotal() {
     let total = 0;
     this.state.cart.forEach((item) => {
       const price = parseFloat(item.productPrice); // Conshvert to number
-      if (!isNaN(price)) {
-        total += price;
+      const quantity = parseInt(item.quantity); // Convert to number
+      if (!isNaN(price) && !isNaN(quantity)) {
+        total += price * quantity; // Multiply price by quantity
       }
     });
-    const shippingCost = 20; // Assuming shipping cost is $20
+    const shippingCost = 0; // Assuming shipping cost is $20
     total += shippingCost;
     return total;
   }
@@ -186,11 +281,23 @@ export default class HomePage extends Component {
     this.setState({ selectedProduct });
   };
 
-  handleInputChange = (e) => {
-    const query = e.target.value;
-    this.setState({ searchQuery: query }, () => {
-      this.performSearch();
+  handleInputChange = (event) => {
+    this.setState({ searchQuery: event.target.value }, () => {
+      this.searchProducts();
     });
+  };
+  searchProducts = () => {
+    const { products, searchQuery } = this.state;
+    const matchedProducts = products.filter((product) => {
+      const companyMatch = product.productCompany
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const sizeMatch = product.tyreSize
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      return companyMatch || sizeMatch;
+    });
+    this.setState({ filteredProducts: matchedProducts });
   };
 
   performSearch = () => {
@@ -205,16 +312,16 @@ export default class HomePage extends Component {
   };
 
   render() {
-    const { searchQuery, searchResults } = this.state;
+    const { searchQuery, searchResults, filteredProducts } = this.state;
     const { isFormVisible } = this.state;
 
     return (
-      <div className="">
+      <div className="" style={{ userSelect: "none" }}>
         <header class="header-area header-padding-1 sticky-bar header-res-padding clearfix">
           <div class="container-fluid">
             <div class="row">
               <div class="col-xl-2 col-lg-2 col-md-6 col-4">
-                <div class="logo">
+                <div class="logo" title="" style={{ userSelect: "none" }}>
                   <a href="/">
                     <img
                       alt=""
@@ -427,21 +534,31 @@ export default class HomePage extends Component {
                 <div class="header-right-wrap">
                   <div class="same-style header-search">
                     <a class="search-active" href="#">
-                      <i class="pe-7s-search"></i>
+                      <i class="pe-7s-search" title="search karle"></i>
                     </a>
                     <div class="search-content">
                       <form action="#">
                         <input
                           type="text"
                           placeholder="Search"
-                          value={searchQuery}
+                          value={this.state.searchQuery}
                           onChange={this.handleInputChange}
                         />
                         <ul>
-                          {searchResults.map((result) => (
+                          {/* {searchResults.map((result) => (
                             <li key={result.id}>{result.name}</li>
                           ))}
-                          <i class="pe-7s-search"></i>
+                          <i class="pe-7s-search"></i> */}
+                          <div>
+                            {filteredProducts.map((product) => (
+                              <div key={product.productId}>
+                                {/* Display product information */}
+                                <p>{product.productCompany}</p>
+                                <p>{product.tyreSize}</p>
+                                {/* Other product details */}
+                              </div>
+                            ))}
+                          </div>
                         </ul>
                         {/* </button> */}
                       </form>
@@ -526,6 +643,40 @@ export default class HomePage extends Component {
                                 />
                               </a>
                             </div>
+                            <div class="quantity-controls">
+                              <FaMinus
+                                className={
+                                  item.quantity > 1
+                                    ? "quantity-button minus"
+                                    : "quantity-button minus disabled"
+                                }
+                                onClick={() =>
+                                  item.quantity > 1 &&
+                                  this.handleRemoveFromCart2(item)
+                                }
+                              />
+                              <div
+                                class="quantity-display"
+                                style={{
+                                  userSelect: "none",
+                                  pointerEvents: "none",
+                                }}
+                              >
+                                {item.quantity}
+                              </div>
+                              <FaPlus
+                                className="quantity-button plus"
+                                onClick={() => this.handleAddToCart(item)}
+                              />
+                            </div>
+                            <div class="shopping-cart-delete">
+                              <button
+                                style={{ top: "-80px" }}
+                                onClick={() => this.handleRemoveFromCart(index)}
+                              >
+                                <i className="fa fa-times-circle"></i>
+                              </button>
+                            </div>
                             <div class="shopping-cart-title">
                               <h4>
                                 <a href="#">
@@ -534,27 +685,18 @@ export default class HomePage extends Component {
                                   {item.productName}
                                 </a>
                               </h4>
-                              <h6>Qty: {item.productQuantity}</h6>
-                              <span>&#8377;{item.productPrice}</span>
-                            </div>
-                            <div class="shopping-cart-delete">
-                              {/* <a href="#">
-                              <i class="fa fa-times-circle"></i>
-                            </a> */}
-                              <button
-                                onClick={() => this.handleRemoveFromCart(index)}
-                              >
-                                <i className="fa fa-times-circle"></i>
-                              </button>
+                              <h6>
+                                Available Stock :
+                                {item.productQuantity - item.quantity}
+                              </h6>
+                              <span>&#8377; : {item.productPrice} /pcs</span>
                             </div>
                           </li>
                         ))}
                       </ul>
                       {/* *******CART TOTAL *********** */}
                       <div class="shopping-cart-total">
-                        <h4>
-                          Shipping : <span>&#8377;20.00</span>
-                        </h4>
+                        <h4>{/* Shipping : <span>&#8377;20.00</span> */}</h4>
                         <h4>
                           SubTotal:
                           <span className="shop-total">
@@ -872,7 +1014,10 @@ export default class HomePage extends Component {
                     .map((prod, index) => (
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
-                          <div class="product-img">
+                          <div
+                            class="product-img"
+                            style={{ userSelect: "none" }}
+                          >
                             <a href="##" key={index}>
                               <img
                                 className="default-img"
@@ -898,13 +1043,37 @@ export default class HomePage extends Component {
                                 </a>
                               </div>
                               {/* 000 */}
-                              <div class="pro-same-action pro-cart">
-                                <a
-                                  onClick={() => this.handleAddToCart(prod)}
-                                  title="Add To Cart"
-                                >
-                                  <i class="pe-7s-cart"></i> Add to cart
-                                </a>
+
+                              <div className="pro-same-action pro-cart">
+                                <FaMinus
+                                  style={{
+                                    backgroundColor: "white",
+                                    fontSize: "9px",
+                                  }}
+                                  onClick={() =>
+                                    this.handleRemoveFromCart2(prod)
+                                  }
+                                />
+
+                                {this.isProductInCart(prod) ? (
+                                  <button
+                                    style={{ backgroundColor: "transparent" }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i>{" "}
+                                    {this.getProductQuantity(prod)} Added In
+                                    Cart
+                                  </button>
+                                ) : (
+                                  <button
+                                    style={{ backgroundColor: "transparent" }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i> Add to cart
+                                  </button>
+                                )}
                               </div>
 
                               {/* 000 */}
@@ -949,10 +1118,13 @@ export default class HomePage extends Component {
                 <div class="row">
                   {this.state.products
                     .filter((prod) => prod.categoryName === "Four Wheeler")
-                    .map((prod, index) => (
+                    .map((prod, index, quantity) => (
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
-                          <div class="product-img">
+                          <div
+                            class="product-img"
+                            style={{ userSelect: "none" }}
+                          >
                             <a href="##" key={index}>
                               <img
                                 className="default-img"
@@ -965,7 +1137,15 @@ export default class HomePage extends Component {
                                 alt={`Imagee ${index}`}
                               />
                             </a>
-                            <span class="pink">{prod.discount}</span>
+                            <span
+                              class="pink"
+                              style={{
+                                userSelect: "none",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              {prod.discount}
+                            </span>
                             <div
                               class="product-action"
                               onClick={() => {
@@ -982,14 +1162,76 @@ export default class HomePage extends Component {
                                   <i class="pe-7s-like"></i>
                                 </a>
                               </div>
-                              <div class="pro-same-action pro-cart">
-                                <a
-                                  onClick={() => this.handleAddToCart(prod)}
-                                  title="Add To Cart"
-                                >
-                                  <i class="pe-7s-cart"></i> Add to cart
-                                </a>
+                              {/* <div className="pro-same-action pro-cart">
+                                <FaMinus
+                                  style={{
+                                    backgroundColor: "white",
+                                    fontSize: "9px",
+                                  }}
+                                  onClick={() =>
+                                    this.handleRemoveFromCart2(prod)
+                                  }
+                                />
+                                {this.isProductInCart(prod) ? (
+                                  <button
+                                    style={{ backgroundColor: "transparent" }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i>{" "}
+                                    {this.getProductQuantity(prod)} Added In
+                                    Cart
+                                  </button>
+                                ) : (
+                                  <button
+                                    style={{ backgroundColor: "transparent" }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i> Add to cart
+                                  </button>
+                                )}
+                              </div> */}
+
+                              <div className="pro-same-action pro-cart">
+                                {this.isProductInCart(prod) &&
+                                this.getProductQuantity(prod) > 0 ? (
+                                  <FaMinus
+                                    className="quantity-button minus"
+                                    onClick={() =>
+                                      this.handleRemoveFromCart2(prod)
+                                    }
+                                  />
+                                ) : null}
+                                {this.isProductInCart(prod) ? (
+                                  <button
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      fontSize: "14px",
+                                      textAlign: "center",
+                                      lineHeight: "1.8",
+                                    }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i>
+                                    {this.getProductQuantity(prod)} Added In
+                                    Cart
+                                  </button>
+                                ) : (
+                                  <button
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      userSelect: "none",
+                                    }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i> Add to cart
+                                  </button>
+                                )}
                               </div>
+
                               <div class="pro-same-action pro-quickview">
                                 <a
                                   title="Quick View"
@@ -1034,7 +1276,10 @@ export default class HomePage extends Component {
                     .map((prod, index) => (
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
-                          <div class="product-img">
+                          <div
+                            class="product-img"
+                            style={{ userSelect: "none" }}
+                          >
                             {/* <a href="#">
                                                 <img class="default-img" src="assets/img/product/Ceat6.webp" alt=""/>
                                                 <img class="hover-img" src="assets/img/product/Ceat7.webp" alt=""/>
@@ -1066,14 +1311,35 @@ export default class HomePage extends Component {
                               </div>
                               {/* 0000 */}
 
-                              <div class="pro-same-action pro-cart">
-                                <a
-                                  onClick={() => this.handleAddToCart(prod)}
-                                  title="Add To Cart"
-                                  href="#"
-                                >
-                                  <i class="pe-7s-cart"></i> Add to cart
-                                </a>
+                              <div className="pro-same-action pro-cart">
+                                <FaMinus
+                                  style={{
+                                    backgroundColor: "white",
+                                    fontSize: "9px",
+                                  }}
+                                  onClick={() =>
+                                    this.handleRemoveFromCart2(prod)
+                                  }
+                                />
+                                {this.isProductInCart(prod) ? (
+                                  <button
+                                    style={{ backgroundColor: "transparent" }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i>{" "}
+                                    {this.getProductQuantity(prod)} Added In
+                                    Cart
+                                  </button>
+                                ) : (
+                                  <button
+                                    style={{ backgroundColor: "transparent" }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i> Add to cart
+                                  </button>
+                                )}
                               </div>
 
                               {/* 000 */}
