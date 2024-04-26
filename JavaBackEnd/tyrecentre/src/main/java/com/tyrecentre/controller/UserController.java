@@ -20,7 +20,7 @@ import com.tyrecentre.utility.EncryptionDecryption;
 @RequestMapping("/user")
 class UserController {
 
-    @Autowired
+    @Autowired	
     private CustomerRepo customerRepo;
 
     @PostMapping("/signup")

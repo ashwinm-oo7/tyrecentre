@@ -16,10 +16,19 @@ function PopupModal({ selectedItem, handleCloseModal, handleUpdate }) {
     // setUpdatedItem({ ...updatedItem, [name]: value });
   };
 
-  const handleSubmit = (param) => {
-    console.log("updatedItem : ", param);
-    // return;
-    handleUpdate(updatedItem, param);
+  // const handleSubmit = (param) => {
+  //   console.log("updatedItem : ", param);
+
+  //   handleUpdate(updatedItem, param);
+  // };
+  const handleSubmit = () => {
+    // Determine the parameter based on whether the selectedItem is a subcategory or category
+    const param = updatedItem.subCategoryName
+      ? "subCategoryData"
+      : "categoryData";
+
+    // Pass the _id, updatedData, and param to the handleUpdate function
+    handleUpdate(selectedItem._id, updatedItem, param);
   };
 
   return (

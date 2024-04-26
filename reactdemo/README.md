@@ -198,7 +198,6 @@ The project structure is organized as follows:
 The project uses the following dependencies:
 
 - React: JavaScript library for building user interfaces.
-- React Router DOM: Library for routing in React applications.
 - React Icons: Library providing a set of popular icons as React components.
 - React Toastify: Library for toast notifications in React applications.
 - Axios: Library for making HTTP requests.
@@ -215,15 +214,18 @@ In the project directory, you can run:
 
 ## Technologies Used
 
-- **Backend Technologies**: Java8 Springboot
+- **Backend Technologies**: Node.js 
 - **Database**: MongoDB.
 - **APIs**: ().
+
+
 ## Additional Features
 
 - **Responsive Design**: The application is designed to be responsive and accessible across various devices and screen sizes.
 - **Error Handling**: Errors and exceptions are handled gracefully, with appropriate error messages displayed to users.
 - **Validation**: Form validation mechanisms are implemented to ensure data integrity and prevent submission of invalid data.
 - **User Roles and Permissions**: Different user roles (e.g., admin, customer, vendor) are implemented with corresponding permissions.
+
 
 ## Future Enhancements
 
@@ -236,5 +238,52 @@ In the project directory, you can run:
 - **Integration Tests**: Integration tests cover the interaction between different components or modules.
 
 
+## Database Connection
+
+The project uses MongoDB as the database. To connect to the database, a `Database` class is implemented in the `database.js` file. This class provides methods to establish a connection to the MongoDB database and retrieve the database instance.
+
+### Code Snippet
+
+```javascript
+const { MongoClient } = require("mongodb");
+
+class Database {
+  constructor(uri, dbName) {
+    this.uri = uri;
+    this.dbName = dbName;
+    this.client = new MongoClient(this.uri);
+    this.db = null;
+  }
+
+  async connect() {
+    try {
+      await this.client.connect();
+      this.db = this.client.db(this.dbName);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
+  }
+
+  async getDb() {
+    if (!this.db) {
+      throw new Error("Database connection has not been established.");
+    }
+    return this.db;
+  }
+}
+
+const uri = "mongodb+srv://<username>:<password>@<cluster>/<dbname>?retryWrites=true&w=majority";
+const dbName = "<dbname>";
+
+const database = new Database(uri, dbName);
+
+// Export a function to connect to the database and return the database instance
+async function connectDatabase() {
+  await database.connect();
+  return database;
+}
+
+module.exports = { connectDatabase };
 
 

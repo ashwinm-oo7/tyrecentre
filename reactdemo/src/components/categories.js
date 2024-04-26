@@ -1,16 +1,19 @@
 import React, { Component } from "react";
 // import "../css/categories.css";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { FaHome } from "react-icons/fa";
+
 class Categories extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      isOpen: false,
+      // isOpen: false,
       categoryName: "",
       categoryDescription: "",
-      subcategories: [],
-      modalIsOpen: false,
+      // subcategories: [],
+      // modalIsOpen: false,
     };
 
     this.handleCategoryNameChange = this.handleCategoryNameChange.bind(this);
@@ -56,6 +59,7 @@ class Categories extends Component {
       if (response.ok) {
         console.log(response);
         console.log("Add successfully");
+        toast.success(" successfully added");
       } else {
         console.error("Failed to Add category");
       }
@@ -67,8 +71,8 @@ class Categories extends Component {
     const isCategoryNameEmpty = this.state.categoryName.trim() === "";
 
     return (
-      <div>
-        <div style={{ backgroundColor: "lightblue" }}>
+      <div className="categories-container">
+        <div className="label-container">
           <label>
             Category Name<span style={{ color: "red" }}>*</span>:
             <input
@@ -76,37 +80,44 @@ class Categories extends Component {
               value={this.state.categoryName}
               onChange={this.handleCategoryNameChange}
               placeholder="Enter category name"
+              className="input-field"
               required
             />
           </label>
-          <div>
-            <label>
-              Category Description:
-              <textarea
-                value={this.state.categoryDescription}
-                onChange={this.handleCategoryDescriptionChange}
-                placeholder="Enter category name*"
-              />
-            </label>
-          </div>
-          <button
-            onClick={this.handleAddCategory}
-            disabled={isCategoryNameEmpty}
-            style={{
-              marginRight: "0.5cm",
-              backgroundColor: "red",
-              color: "white",
-            }}
-          >
-            Add
-          </button>
-          <p className="next-subcategory">
-            <Link to="/home">Home</Link>
-          </p>
-          <p className="next-subcategory">
-            <Link to="/subcategories">Next</Link>
-          </p>
         </div>
+        <div className="label-container">
+          <label>
+            Category Description:
+            <textarea
+              value={this.state.categoryDescription}
+              onChange={this.handleCategoryDescriptionChange}
+              placeholder="Enter category name*"
+              className="textarea-field"
+            />
+          </label>
+        </div>
+        <button
+          onClick={this.handleAddCategory}
+          disabled={isCategoryNameEmpty}
+          className="submit-button"
+        >
+          Add
+        </button>
+        {/* <p className="next-subcategory" style={{ marginLeft: "440px" }}>
+          <Link to="/subcategories">
+            <FaArrowRight />
+            Next
+          </Link>
+        </p> */}
+        <p
+          className="next-subcategory"
+          style={{ marginLeft: "75px", padding: "50px" }}
+        >
+          <Link to="/home">
+            <FaHome />
+            Home
+          </Link>
+        </p>
       </div>
     );
   }

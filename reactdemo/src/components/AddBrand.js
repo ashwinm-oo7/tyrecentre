@@ -8,6 +8,7 @@ import "../css/AddBrand.css";
 import Subcategories from "./subcategories";
 import Categories from "./categories";
 import AddProduct from "./AddProduct";
+import { FaHome } from "react-icons/fa";
 
 class AddBrand extends Component {
   constructor(props) {
@@ -20,10 +21,13 @@ class AddBrand extends Component {
       productName: "",
       productDescription: "",
       activeTab: "Categories", // Add state for active tab
+      isAdmin: false,
     };
   }
 
   componentDidMount() {
+    const isAdmin = localStorage.getItem("isAdmin");
+    this.setState({ isAdmin });
     this.fetchCategoryOptions();
   }
 
@@ -38,7 +42,7 @@ class AddBrand extends Component {
       );
 
       console.log("Category Options:", categoryOptions);
-      this.setState({ categoryOptions });
+      this.setState({ categoryOptions: categoryOptions });
     } catch (error) {
       console.error("Error fetching category options:", error);
     }
@@ -64,7 +68,7 @@ class AddBrand extends Component {
       );
       console.log("SubCategory Options:", subCategoryOptions);
 
-      this.setState({ subCategoryOptions });
+      this.setState({ subCategoryOptions: subCategoryOptions });
     } catch (error) {
       console.error("Error fetching subcategory options:", error);
     }
@@ -128,123 +132,141 @@ class AddBrand extends Component {
     const isProductNameEmpty = this.state.productName.trim() === "";
 
     return (
-      <div className="add-product-container">
-        <div className="tab-buttons">
-          <button
-            className={this.state.activeTab === "Categories" ? "active" : ""}
-            onClick={() => this.handleTabChange("Categories")}
-          >
-            ADD CATEGORY
-          </button>
-          <button
-            className={this.state.activeTab === "SUBCATEGORY" ? "active" : ""}
-            onClick={() => this.handleTabChange("SUBCATEGORY")}
-          >
-            ADD SUBCATEGORY
-          </button>
-          <button
-            className={this.state.activeTab === "ADD-BRAND" ? "active" : ""}
-            onClick={() => this.handleTabChange("ADD-BRAND")}
-          >
-            {" "}
-            ADD BRAND{" "}
-          </button>
-          <button
-            className={this.state.activeTab === "ADD-PRODUCT" ? "active" : ""}
-            onClick={() => this.handleTabChange("ADD-PRODUCT")}
-          >
-            {" "}
-            ADD PRODUCT{" "}
-          </button>
-        </div>
-        {this.state.activeTab === "ADD-PRODUCT" && (
-          <div>
-            <AddProduct />
-          </div>
-        )}
-        <div className="tab-content">
-          {this.state.activeTab === "Categories" && (
-            <div>
-              <Categories />
-            </div>
-          )}
-
-          {this.state.activeTab === "SUBCATEGORY" && (
-            <div>
-              <Subcategories />
-            </div>
-          )}
-
-          {this.state.activeTab === "ADD-BRAND" && (
-            <div>
-              <label>
-                Category :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <select
-                  value={this.state.selectedCategory}
-                  onChange={this.handleCategoryChange}
-                >
-                  <option value="">Select a category</option>
-                  {this.state.categoryOptions.map((categoryName) => (
-                    <option key={categoryName} value={categoryName}>
-                      {categoryName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Subcategory :&nbsp;&nbsp;
-                <select
-                  value={this.state.selectedSubCategory}
-                  onChange={(e) =>
-                    this.setState({ selectedSubCategory: e.target.value })
-                  }
-                >
-                  <option value="">Select a subcategory</option>
-                  {this.state.subCategoryOptions.map((subcategoryName) => (
-                    <option key={subcategoryName} value={subcategoryName}>
-                      {subcategoryName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Product Tyre Brand<span style={{ color: "red" }}>*</span>:
-                <input
-                  type="text"
-                  value={this.state.productName}
-                  onChange={(e) =>
-                    this.setState({ productName: e.target.value })
-                  }
-                  placeholder="Enter Product Brand"
-                  required
-                />
-              </label>
-
-              <label>
-                Tyre Product Description:
-                <textarea
-                  value={this.state.productDescription}
-                  onChange={(e) =>
-                    this.setState({ productDescription: e.target.value })
-                  }
-                  placeholder="Enter product description"
-                />
-              </label>
-
+      <>
+        {this.state.isAdmin ? (
+          <div className="add-product-container">
+            <div className="tab-buttons">
               <button
-                onClick={this.handleAddProduct}
-                disabled={isProductNameEmpty}
+                className={
+                  this.state.activeTab === "Categories" ? "active" : ""
+                }
+                onClick={() => this.handleTabChange("Categories")}
               >
-                Add Product
+                ADD CATEGORY
               </button>
-
-              <Link to="/categories">Back</Link>
+              <button
+                className={
+                  this.state.activeTab === "SUBCATEGORY" ? "active" : ""
+                }
+                onClick={() => this.handleTabChange("SUBCATEGORY")}
+              >
+                ADD SUBCATEGORY
+              </button>
+              <button
+                className={this.state.activeTab === "ADD-BRAND" ? "active" : ""}
+                onClick={() => this.handleTabChange("ADD-BRAND")}
+              >
+                {" "}
+                ADD BRAND{" "}
+              </button>
+              <button
+                className={
+                  this.state.activeTab === "ADD-PRODUCT" ? "active" : ""
+                }
+                onClick={() => this.handleTabChange("ADD-PRODUCT")}
+              >
+                {" "}
+                ADD PRODUCT{" "}
+              </button>
             </div>
-          )}
-        </div>
-      </div>
+            {this.state.activeTab === "ADD-PRODUCT" && (
+              <div>
+                <AddProduct />
+              </div>
+            )}
+            <div className="tab-content">
+              {this.state.activeTab === "Categories" && (
+                <div>
+                  <Categories />
+                </div>
+              )}
+
+              {this.state.activeTab === "SUBCATEGORY" && (
+                <div>
+                  <Subcategories />
+                </div>
+              )}
+
+              {this.state.activeTab === "ADD-BRAND" && (
+                <div>
+                  <label>
+                    Category :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <select
+                      value={this.state.selectedCategory}
+                      onChange={this.handleCategoryChange}
+                    >
+                      <option value="">Select a category</option>
+                      {this.state.categoryOptions.map((categoryName) => (
+                        <option key={categoryName} value={categoryName}>
+                          {categoryName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    Subcategory :&nbsp;&nbsp;
+                    <select
+                      value={this.state.selectedSubCategory}
+                      onChange={(e) =>
+                        this.setState({ selectedSubCategory: e.target.value })
+                      }
+                    >
+                      <option value="">Select a subcategory</option>
+                      {this.state.subCategoryOptions.map((subcategoryName) => (
+                        <option key={subcategoryName} value={subcategoryName}>
+                          {subcategoryName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label>
+                    Product Tyre Brand<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="text"
+                      value={this.state.productName}
+                      onChange={(e) =>
+                        this.setState({ productName: e.target.value })
+                      }
+                      placeholder="Enter Product Brand"
+                      required
+                    />
+                  </label>
+
+                  <label>
+                    Tyre Product Description:
+                    <textarea
+                      value={this.state.productDescription}
+                      onChange={(e) =>
+                        this.setState({ productDescription: e.target.value })
+                      }
+                      placeholder="Enter product description"
+                    />
+                  </label>
+
+                  <button
+                    onClick={this.handleAddProduct}
+                    disabled={isProductNameEmpty}
+                  >
+                    Add Product
+                  </button>
+
+                  <p
+                    className="next-subcategory"
+                    style={{ marginLeft: "85px", padding: "50px" }}
+                  >
+                    <Link to="/home">
+                      <FaHome />
+                      Home
+                    </Link>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </>
     );
   }
 }

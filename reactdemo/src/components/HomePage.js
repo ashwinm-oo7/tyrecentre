@@ -1,10 +1,15 @@
-import React, { Component, useState } from "react";
-import { FaBicycle, FaCar, FaMinus, FaPlus } from "react-icons/fa";
+import React, { Component } from "react";
+import { FaMinus } from "react-icons/fa";
 import axios from "axios";
 import "../css/home.css";
+import MainPopup from "./MainPopup";
+
 export default class HomePage extends Component {
   constructor(props) {
     super(props);
+    this.imgRef = React.createRef();
+    this.resultRef = React.createRef();
+
     this.state = {
       isLoggedIn: false,
       products: [],
@@ -12,13 +17,23 @@ export default class HomePage extends Component {
       bikeBrands: [],
       cart: [],
       selectedProduct: null,
-      searchData: [], // Your original data array
+      searchData: [],
       searchQuery: "",
+      searchHistory: [],
+      isInputFocused: false,
       searchResults: [],
       isFormVisible: false,
       feedback: "",
       filteredProducts: [],
+      showOne: true,
+
+      cx: 0,
+      cy: 0,
+
+      // selectedProduct: null,
+      isHovered: false, // Track hover state
     };
+
     this.fetchAllProducts();
     this.fetchAllBikeProducts();
     this.handleAddToCart = this.handleAddToCart.bind(this);
@@ -26,19 +41,137 @@ export default class HomePage extends Component {
     this.handleRemoveFromCart2 = this.handleRemoveFromCart2.bind(this);
     this.handleCheckout = this.handleCheckout.bind(this);
     this.fetchCartFromLocalStorage();
+    this.handleRemove = this.handleRemove.bind(this);
   }
+  handleImageLoad = () => {
+    try {
+      const imgRefCurrent = this.imgRef.current;
+      const resultRefCurrent = this.resultRef.current;
+
+      if (!imgRefCurrent || !resultRefCurrent) {
+        console.error("Image or result reference is null");
+        return;
+      }
+
+      const lens = document.createElement("div");
+      lens.setAttribute("class", "img-zoom-lens");
+      imgRefCurrent.parentElement?.insertBefore(lens, imgRefCurrent);
+
+      const cx = resultRefCurrent.offsetWidth / lens.offsetWidth;
+      const cy = resultRefCurrent.offsetHeight / lens.offsetHeight;
+
+      this.setState({ cx, cy });
+
+      resultRefCurrent.style.backgroundImage = `url('${imgRefCurrent.src}')`;
+      resultRefCurrent.style.backgroundSize = `${imgRefCurrent.width * cx}px ${
+        imgRefCurrent.height * cy
+      }px`;
+
+      lens.addEventListener("mousemove", this.moveLens);
+      imgRefCurrent.addEventListener("mousemove", this.moveLens);
+      lens.addEventListener("touchmove", this.moveLens);
+      imgRefCurrent.addEventListener("touchmove", this.moveLens);
+    } catch (error) {
+      console.error("Error in handleImageLoad:", error);
+    }
+  };
+  handleHover = (isHovered) => {
+    // console.log("Hovered state:", isHovered);
+    this.setState({ isHovered });
+  };
+
+  moveLens = (e) => {
+    try {
+      e.preventDefault();
+      const pos = this.getCursorPos(e);
+      let x = pos.x - this.imgRef.current.offsetWidth / 2;
+      let y = pos.y - this.imgRef.current.offsetHeight / 2;
+
+      if (x > this.imgRef.current.width - 40)
+        x = this.imgRef.current.width - 40;
+      if (x < 0) x = 0;
+      if (y > this.imgRef.current.height - 40)
+        y = this.imgRef.current.height - 40;
+      if (y < 0) y = 0;
+
+      const lens = document.querySelector(".img-zoom-lens");
+      lens.style.left = `${x}px`;
+      lens.style.top = `${y}px`;
+      this.resultRef.current.style.backgroundPosition = `-${
+        x * this.state.cx
+      }px -${y * this.state.cy}px`;
+    } catch (error) {
+      console.error("Error in moveLens:", error);
+    }
+  };
+
+  getCursorPos = (e) => {
+    try {
+      let x = 0,
+        y = 0;
+      const imgRect = this.imgRef.current.getBoundingClientRect();
+      x = e.pageX - imgRect.left - window.pageXOffset;
+      y = e.pageY - imgRect.top - window.pageYOffset;
+      return { x, y };
+    } catch (error) {
+      console.error("Error in getCursorPos:", error);
+      return { x: 0, y: 0 };
+    }
+  };
+
+  componentDidMount() {
+    // Retrieve search history from local storage or backend
+    const searchHistory =
+      JSON.parse(localStorage.getItem("searchHistory")) || [];
+    this.setState({ searchHistory });
+    const userId = localStorage.getItem("userId");
+    this.setState({ userId });
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    this.setState({ cart: storedCart });
+  }
+  componentDidUpdate(prevProps, prevState) {
+    // Check if the cart state has changed
+    if (prevState.cart !== this.state.cart) {
+      // Perform actions you want to execute when the cart state changes
+      // console.log("Cart has been updated:", this.state.cart);
+      // You can perform any additional logic here, such as updating the UI or making API calls
+      localStorage.setItem("cart", JSON.stringify(this.state.cart));
+    }
+  }
+
+  // handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const response = await axios.post(
+  //       process.env.REACT_APP_API_URL + "feedback/addFeedback",
+  //       { feedback: this.state.feedback }
+  //     );
+  //     console.log("Feedback submitted:", response.data);
+  //   } catch (error) {
+  //     console.error("Error submitting feedback:", error);
+  //   }
+  // };
+
   handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const userEmail = localStorage.getItem("userEmail");
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const feedbackData = {
+        feedback: this.state.feedback,
+      };
+      if (isAdmin && userEmail) {
+        feedbackData.userEmail = userEmail;
+      }
+
       const response = await axios.post(
         process.env.REACT_APP_API_URL + "feedback/addFeedback",
-        { feedback: this.state.feedback }
+        feedbackData
       );
-      console.log("Feedback submitted:", response.data);
-      // Handle success, e.g., show a success message to the user
+      // console.log("Feedback submitted:", response.data);
+      this.setState({ isFormVisible: false });
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      // Handle error, e.g., show an error message to the user
     }
   };
 
@@ -55,17 +188,17 @@ export default class HomePage extends Component {
       const response = await axios.get(
         process.env.REACT_APP_API_URL + "product/getAllProducts"
       );
-      console.log("fetchAllProducts Response:", response.data);
-      console.log("áddfdfsfsdf : ", response.data);
+      // console.log("fetchAllProducts Response:", response.data);
+      // console.log("áddfdfsfsdf : ", response.data);
 
       let bikeBrands = [];
       response.data
         .filter((prod) => prod.categoryName === "Two Wheeler")
         .forEach(async (prod, index) => {
-          console.log(prod.vehicleBrandModels);
+          // console.log(prod.vehicleBrandModels);
           if (prod.vehicleBrandModels) {
             prod.vehicleBrandModels.forEach((vehi, index2) => {
-              console.log(vehi.name);
+              // console.log(vehi.name);
               if (!bikeBrands.includes(vehi.name) && bikeBrands.length < 10) {
                 bikeBrands.push(vehi.name);
               }
@@ -74,7 +207,8 @@ export default class HomePage extends Component {
               prod.productMrpPrice,
               prod.productPrice
             );
-            console.log("discounttt", discountPercentage);
+            // console.log("discounttt", discountPercentage);
+
             prod.discount = Math.floor(discountPercentage) + " % off";
           }
         });
@@ -87,7 +221,7 @@ export default class HomePage extends Component {
             prod.productMrpPrice,
             prod.productPrice
           );
-          console.log("discounttt", discountPercentage);
+          // console.log("discounttt", discountPercentage);
           prod.discount = Math.floor(discountPercentage) + " % off";
         });
       this.setState({ products: response.data, bikeBrands: bikeBrands });
@@ -105,17 +239,17 @@ export default class HomePage extends Component {
       response.data
         .filter((prod) => prod.categoryName === "Four Wheeler")
         .forEach(async (prod, index) => {
-          console.log(prod.vehicleBrandModels);
+          // console.log(prod.vehicleBrandModels);
           if (prod.vehicleBrandModels) {
             prod.vehicleBrandModels.forEach((vehi, index2) => {
-              console.log(vehi.name);
+              // console.log(vehi.name);
               if (!carBrands.includes(vehi.name) && carBrands.length < 10) {
                 carBrands.push(vehi.name);
               }
             });
           }
         });
-      console.log("fetchAllProducts CARRRRR:", response.data);
+      // console.log("fetchAllProducts CARRRRR:", response.data);
       this.setState({ products: response.data, carBrands: carBrands });
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -124,19 +258,14 @@ export default class HomePage extends Component {
 
   logout() {
     localStorage.clear();
+    // localStorage.setItem("cart", JSON.stringify(this.state.cart));
     window.location = process.env.REACT_APP_API_URL_FOR_GUI + "/login";
     // window.location = "https://ashwinm-oo7.github.io/login";
   }
-  // handleAddToCart = (product) => {
-  //   const updatedCart = [...this.state.cart, product];
-  //   this.setState({ cart: updatedCart }, () => {
-  //     this.saveCartToLocalStorage(updatedCart);
-  //   });
-  // };
 
   handleAddToCart = (product) => {
     const { cart } = this.state;
-    const index = cart.findIndex((item) => item.id === product.id);
+    const index = cart.findIndex((item) => item._id === product._id);
     const availableQuantity = product.productQuantity;
 
     if (index !== -1) {
@@ -163,12 +292,12 @@ export default class HomePage extends Component {
 
   isProductInCart = (product) => {
     const { cart } = this.state;
-    return cart.some((item) => item.id === product.id);
+    return cart.some((item) => item._id === product._id);
   };
 
   getProductQuantity = (product) => {
     const { cart } = this.state;
-    const index = cart.findIndex((item) => item.id === product.id);
+    const index = cart.findIndex((item) => item._id === product._id);
     return index !== -1 ? cart[index].quantity : 0;
   };
 
@@ -180,43 +309,11 @@ export default class HomePage extends Component {
     });
   }
 
-  // handleRemoveFromCart2 = (index) => {
-  //   const { cart } = this.state;
-  //   const updatedCart = [...cart];
-  //   if (updatedCart[index].quantity > 1) {
-  //     updatedCart[index].quantity -= 1;
-  //     updatedCart[index].amount -= updatedCart[index].productPrice;
-  //   } else {
-  //     updatedCart.splice(index, 1);
-  //   }
-  //   this.setState({ cart: updatedCart }, () => {
-  //     this.saveCartToLocalStorage(updatedCart);
-  //   });
-  // };
-  // handleRemoveFromCart3 = (productToRemove) => {
-  //   const { cart } = this.state;
-  //   const index = cart.findIndex((item) => item.id === productToRemove.id);
-
-  //   if (index !== -1) {
-  //     const updatedCart = [...cart];
-  //     if (updatedCart[index].quantity > 1) {
-  //       updatedCart[index].quantity -= 1; // Decrement the quantity by 1
-  //       updatedCart[index].amount -= updatedCart[index].price; // Subtract the price from the total amount
-  //     } else {
-  //       updatedCart.splice(index, 1); // Remove the product if the quantity becomes 0
-  //     }
-
-  //     this.setState({ cart: updatedCart }, () => {
-  //       this.saveCartToLocalStorage(updatedCart);
-  //     });
-  //   }
-  // };
-
   handleRemoveFromCart2 = (productToRemove) => {
     const { cart } = this.state;
     const updatedCart = [...cart];
     const index = updatedCart.findIndex(
-      (item) => item.id === productToRemove.id
+      (item) => item._id === productToRemove._id
     );
 
     if (index !== -1) {
@@ -250,16 +347,15 @@ export default class HomePage extends Component {
   }
 
   handleCheckout() {
-    // Calculate tax (28%)
     const taxRate = 0.28;
     const subtotal = this.calculateTotal();
     const taxAmount = subtotal * taxRate;
     const finalAmount = subtotal + taxAmount;
 
     // Display the checkout information
-    console.log("Subtotal:", subtotal);
-    console.log("Tax (28%):", taxAmount);
-    console.log("Final Amount to Pay:", finalAmount);
+    // console.log("Subtotal:", subtotal);
+    // console.log("Tax (28%):", taxAmount);
+    // console.log("Final Amount to Pay:", finalAmount);
 
     // You can perform additional actions here, such as sending the checkout information to the server or navigating to a checkout page
   }
@@ -276,585 +372,152 @@ export default class HomePage extends Component {
   }
 
   fetchProductDetails = (selectedProduct) => {
-    console.log("Selected Product:", selectedProduct); // For debugging
+    // console.log("Selected Product:", selectedProduct);
+    // For debugging
     // Perform any additional actions to fetch product details as needed
     this.setState({ selectedProduct });
   };
 
   handleInputChange = (event) => {
-    this.setState({ searchQuery: event.target.value }, () => {
-      this.searchProducts();
+    const searchQuery = event.target.value; // Get the search query entered by the user
+    const { products } = this.state;
+
+    const filteredProducts = products.filter((product) => {
+      const vehicleBrandNames = product.vehicleBrandModels
+        .map((model) =>
+          model.name.replace(":", "").replace(/\s/g, "").replace(/[^\w]/g, "")
+        )
+        .join(" ");
+
+      const mrpPriceString = `${product.productMrpPrice ?? ""}${
+        product.productPrice ?? ""
+      }${product.tyreSize ?? ""}${product.productDescription ?? ""}`.toString(); // Concatenate multiple properties into a single string
+
+      const normalizedMrpPrice = mrpPriceString
+        .replace(/[^\d]/g, "")
+        .toLowerCase();
+      // const searchQueryLower = searchQuery
+      //   .replace(/[^\d]/g, "")
+      //   .toLowerCase()
+      //   .toString();
+
+      return (
+        vehicleBrandNames
+          .toLowerCase()
+          .includes(
+            searchQuery
+              .toLowerCase()
+              .replace(":", "")
+              .replace(/\s/g, "")
+              .replace(/[^\w]/g, "")
+          ) ||
+        product.categoryName
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          .includes(
+            searchQuery.toLowerCase().replace(/\s+/g, "").replace(/[^\w]/g, "")
+          ) ||
+        product.brandName
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          .includes(
+            searchQuery.toLowerCase().replace(/\s+/g, "").replace(/[^\w]/g, "")
+          ) ||
+        product.productName
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          .includes(
+            searchQuery.toLowerCase().replace(/\s+/g, "").replace(/[^\w]/g, "")
+          ) ||
+        product.subCategoryName
+          .toLowerCase()
+          .replace(/\s+/g, "")
+          .includes(
+            searchQuery.toLowerCase().replace(/\s+/g, "").replace(/[^\w]/g, "")
+          ) ||
+        normalizedMrpPrice
+          .replace(/\s+/g, "")
+          .includes(
+            searchQuery.toLowerCase().replace(/\s+/g, "").replace(/[^\w]/g, "")
+          )
+      );
     });
-  };
-  searchProducts = () => {
-    const { products, searchQuery } = this.state;
-    const matchedProducts = products.filter((product) => {
-      const companyMatch = product.productCompany
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-      const sizeMatch = product.tyreSize
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-      return companyMatch || sizeMatch;
-    });
-    this.setState({ filteredProducts: matchedProducts });
+    // console.log(filteredProducts);
+
+    this.setState({ searchQuery, filteredProducts });
   };
 
-  performSearch = () => {
-    const { searchData, searchQuery } = this.state;
-    const results = searchData.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    this.setState({ searchResults: results });
+  handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      this.handleSearch();
+    }
   };
+
+  handleSearch = () => {
+    const { searchQuery, searchHistory } = this.state;
+    if (searchQuery.trim() !== "") {
+      // Save search query to history if not already present
+      if (!searchHistory.includes(searchQuery)) {
+        const updatedSearchHistory = [...searchHistory, searchQuery];
+        this.setState({ searchHistory: updatedSearchHistory });
+        localStorage.setItem(
+          "searchHistory",
+          JSON.stringify(updatedSearchHistory)
+        );
+      }
+
+      // Perform search operation
+      // Your search logic goes here
+      // console.log("Performing search for:", searchQuery);
+    }
+  };
+
+  handleInputFocus = () => {
+    this.setState({ isInputFocused: true });
+  };
+
+  // Function to handle input blur
+  handleInputBlur = () => {
+    this.setState({ isInputFocused: false, showSearchHistory: false });
+  };
+
+  handleRemove = (indexToRemove) => {
+    this.setState((prevState) => {
+      const updatedSearchHistory = prevState.searchHistory.filter(
+        (_, index) => index !== indexToRemove
+      );
+      localStorage.setItem(
+        "searchHistory",
+        JSON.stringify(updatedSearchHistory)
+      );
+      return {
+        searchHistory: updatedSearchHistory,
+        // searchQuery: "",
+        // isInputFocused: false,
+        // showSearchHistory: false,
+      };
+    });
+  };
+
   toggleFormVisibility = () => {
     this.setState({ isFormVisible: !this.state.isFormVisible });
   };
+  handleRefreshPage = () => {
+    window.location.reload();
+  };
 
   render() {
-    const { searchQuery, searchResults, filteredProducts } = this.state;
+    // const { cart } = this.state;
+
+    // const { isHovered } = this.state;
+
     const { isFormVisible } = this.state;
+
+    // Prioritizing props over state
 
     return (
       <div className="" style={{ userSelect: "none" }}>
-        <header class="header-area header-padding-1 sticky-bar header-res-padding clearfix">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-xl-2 col-lg-2 col-md-6 col-4">
-                <div class="logo" title="" style={{ userSelect: "none" }}>
-                  <a href="/">
-                    <img
-                      alt=""
-                      src="assets/img/logo/tyrelogo.jpg"
-                      style={{ width: "120px", height: "auto" }}
-                    />
-                  </a>
-                </div>
-              </div>
-              <div class="col-xl-8 col-lg-8 d-none d-lg-block">
-                <div class="main-menu" style={{ backgroundColor: "#e6e6ff" }}>
-                  <nav>
-                    <ul>
-                      <li>
-                        <a href="/">
-                          <FaCar /> Cars <i class="fa fa-angle-down"></i>
-                        </a>
-                        <ul class="mega-menu mega-menu-padding">
-                          <li>
-                            <ul>
-                              <li class="mega-menu-title">
-                                <a>Four Wheeler</a>
-                              </li>
-                              {this.state.carBrands.map((vehi, index2) => (
-                                <li>
-                                  <a href="#" key={index2}>
-                                    {vehi}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
-                          </li>
-                          <li>
-                            <ul>
-                              <li class="mega-menu-img">
-                                <a href="#">
-                                  <img
-                                    src="assets/img/cars/car.webp"
-                                    style={{ width: "400px" }}
-                                    alt=""
-                                  />
-                                  <img
-                                    src="assets/img/cars/4tyre.webp"
-                                    style={{ width: "450px" }}
-                                    alt=""
-                                  />
-                                </a>
-                              </li>
-                            </ul>
-                          </li>
-                        </ul>
-                      </li>
-
-                      <li>
-                        <a href="#">
-                          <FaBicycle /> Bike <i class="fa fa-angle-down"></i>{" "}
-                        </a>
-                        <ul class="mega-menu">
-                          <li>
-                            <ul>
-                              <li class="mega-menu-title">
-                                <a href="#">Two Wheeler</a>
-                              </li>
-                              {this.state.bikeBrands.map((vehi, index2) => (
-                                <li>
-                                  <a href="#" key={index2}>
-                                    {vehi}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
-                          </li>
-                          <li>
-                            <ul>
-                              <li class="mega-menu-img">
-                                <a href="#">
-                                  <img
-                                    src="assets/img/cars/scooter.webp"
-                                    style={{ width: "350px" }}
-                                    alt=""
-                                  />
-                                </a>
-                              </li>
-                            </ul>
-                          </li>
-                        </ul>
-                      </li>
-                      <li>
-                        <a href="#">
-                          Details <i class="fa fa-angle-down"></i>
-                        </a>
-                        <ul class="submenu">
-                          <li>
-                            <p>
-                              <a href="/login">login / register</a>
-                            </p>
-                          </li>
-                          <li>
-                            <a href="/about">about us</a>
-                          </li>
-                          <li>
-                            <a href="#">cart page</a>
-                          </li>
-                          <li>
-                            <a href="#">checkout </a>
-                          </li>
-                          <li>
-                            <a href="#">wishlist </a>
-                          </li>
-                          <li>
-                            <a href="/myAccount">My Account</a>
-                          </li>
-                          <li>
-                            <a href="#">contact us </a>
-                          </li>
-                          <li>
-                            <a href="#">404 page </a>
-                          </li>
-                        </ul>
-                      </li>
-                      {/* <li>
-                        <a href="#">
-                          Blog <i class="fa fa-angle-down"></i>
-                        </a>
-                        <ul class="submenu">
-                          <li>
-                            <a href="#">blog standard</a>
-                          </li>
-                          <li>
-                            <a href="#">blog no sidebar</a>
-                          </li>
-                          <li>
-                            <a href="#">blog right sidebar</a>
-                          </li>
-                          <li>
-                            <a href="#">blog details 1</a>
-                          </li>
-                          <li>
-                            <a href="#">blog details 2</a>
-                          </li>
-                          <li>
-                            <a href="#">blog details 3</a>
-                          </li>
-                        </ul>
-                      </li> */}
-                      {/* <li>
-                        <a href="/about"> About </a>
-                      </li> */}
-                      {/* <li>
-                        <a href="/categories">
-                          Categories <i class="fa fa-angle-down"></i>
-                        </a>
-                        <ul class="submenu">
-                          <li>
-                            <a href="/CategoryList">
-                              CategoryList
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">blog no sidebar</a>
-                          </li>
-                          <li>
-                            <a href="#">blog right sidebar</a>
-                          </li>
-                          <li>
-                            <a href="#">blog details 1</a>
-                          </li>
-                          <li>
-                            <a href="#">blog details 2</a>
-                          </li>
-                          <li>
-                            <a href="#">blog details 3</a>
-                          </li>
-                        </ul>
-                      </li> */}
-                      {localStorage.getItem("isAdmin") === "true" ? (
-                        <li>
-                          <a href="#">
-                            {" "}
-                            Masters <i class="fa fa-angle-down"></i>
-                          </a>
-                          <ul class="submenu">
-                            <li>
-                              <a href="/add-brand">Add Brand</a>
-                            </li>
-                            <li>
-                              <a href="/CategoryList">CategoryList</a>
-                            </li>
-                            <li>
-                              <a href="/puncture-repair-list?isAdmin=true">
-                                Puncture Repair List
-                              </a>
-                            </li>
-                            <li>
-                              <a href="/product-list">Product List</a>
-                            </li>
-                            <li>
-                              <a href="/feedback-list">Feedback List</a>
-                            </li>
-                          </ul>
-                        </li>
-                      ) : (
-                        <></>
-                      )}
-                    </ul>
-                  </nav>
-                </div>
-              </div>
-              <div class="col-xl-2 col-lg-2 col-md-6 col-8">
-                <div class="header-right-wrap">
-                  <div class="same-style header-search">
-                    <a class="search-active" href="#">
-                      <i class="pe-7s-search" title="search karle"></i>
-                    </a>
-                    <div class="search-content">
-                      <form action="#">
-                        <input
-                          type="text"
-                          placeholder="Search"
-                          value={this.state.searchQuery}
-                          onChange={this.handleInputChange}
-                        />
-                        <ul>
-                          {/* {searchResults.map((result) => (
-                            <li key={result.id}>{result.name}</li>
-                          ))}
-                          <i class="pe-7s-search"></i> */}
-                          <div>
-                            {filteredProducts.map((product) => (
-                              <div key={product.productId}>
-                                {/* Display product information */}
-                                <p>{product.productCompany}</p>
-                                <p>{product.tyreSize}</p>
-                                {/* Other product details */}
-                              </div>
-                            ))}
-                          </div>
-                        </ul>
-                        {/* </button> */}
-                      </form>
-                    </div>
-                  </div>
-                  {localStorage.getItem("userEmail") ? (
-                    <div class="same-style account-satting">
-                      <a class="account-satting-active" href="#">
-                        <i class="pe-7s-user-female"></i>
-                      </a>
-                      <div class="account-dropdown">
-                        <ul>
-                          <li>
-                            <a onClick={() => this.logout()} href="/login">
-                              {localStorage.getItem("userEmail")
-                                ? "Logout"
-                                : "Login"}{" "}
-                            </a>
-                          </li>
-
-                          <li>
-                            <a href="/sign-up">Register</a>
-                          </li>
-                          <li>
-                            <a href="#">Wishlist </a>
-                          </li>
-                          <li>
-                            <a href="#">my account</a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  ) : (
-                    <div class="same-style account-satting">
-                      <a class="account-satting-active" href="#">
-                        <i class="pe-7s-user-female"></i>
-                      </a>
-                      <div class="account-dropdown">
-                        <ul>
-                          <li>
-                            <a onClick={() => this.logout()} href="/login">
-                              {localStorage.getItem("userEmail")
-                                ? "Logout"
-                                : "Login"}{" "}
-                            </a>
-                          </li>
-
-                          <li>
-                            <a href="/sign-up">Register</a>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                  {this.state.selectedProduct && (
-                    <div class="same-style header-wishlist">
-                      <a href="#">
-                        <i class="pe-7s-like"></i>
-                        {/* <p>{this.state.selectedProduct.productName}</p> */}
-                      </a>
-                    </div>
-                  )}
-                  {/* 888888888888 CART LIST 888888888888888888888888888 */}
-                  <div class="same-style cart-wrap">
-                    <button class="icon-cart" onClick={this.handleCartClick}>
-                      <i class="pe-7s-shopbag"></i>
-                      <span class="count-style">{this.state.cart.length}</span>
-                    </button>
-                    <div
-                      className="shopping-cart-content"
-                      style={{ maxHeight: "300px", overflowY: "auto" }}
-                    >
-                      <ul>
-                        {this.state.cart.map((item, index) => (
-                          <li class="single-shopping-cart" key={index}>
-                            <div class="shopping-cart-img">
-                              <a href="#">
-                                <img
-                                  alt=""
-                                  src={item.productImages[0].dataURL}
-                                  style={{ width: "50px", height: "50px" }}
-                                />
-                              </a>
-                            </div>
-                            <div class="quantity-controls">
-                              <FaMinus
-                                className={
-                                  item.quantity > 1
-                                    ? "quantity-button minus"
-                                    : "quantity-button minus disabled"
-                                }
-                                onClick={() =>
-                                  item.quantity > 1 &&
-                                  this.handleRemoveFromCart2(item)
-                                }
-                              />
-                              <div
-                                class="quantity-display"
-                                style={{
-                                  userSelect: "none",
-                                  pointerEvents: "none",
-                                }}
-                              >
-                                {item.quantity}
-                              </div>
-                              <FaPlus
-                                className="quantity-button plus"
-                                onClick={() => this.handleAddToCart(item)}
-                              />
-                            </div>
-                            <div class="shopping-cart-delete">
-                              <button
-                                style={{ top: "-80px" }}
-                                onClick={() => this.handleRemoveFromCart(index)}
-                              >
-                                <i className="fa fa-times-circle"></i>
-                              </button>
-                            </div>
-                            <div class="shopping-cart-title">
-                              <h4>
-                                <a href="#">
-                                  {item.tyreSize}
-                                  <span style={{ marginRight: "5px" }}></span>
-                                  {item.productName}
-                                </a>
-                              </h4>
-                              <h6>
-                                Available Stock :
-                                {item.productQuantity - item.quantity}
-                              </h6>
-                              <span>&#8377; : {item.productPrice} /pcs</span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                      {/* *******CART TOTAL *********** */}
-                      <div class="shopping-cart-total">
-                        <h4>{/* Shipping : <span>&#8377;20.00</span> */}</h4>
-                        <h4>
-                          SubTotal:
-                          <span className="shop-total">
-                            &#8377;{this.calculateTotal()}
-                          </span>
-                        </h4>
-                        <h4>
-                          Tax (28%):
-                          <span className="shop-total">
-                            &#8377;{(this.calculateTotal() * 0.28).toFixed(2)}
-                          </span>
-                        </h4>
-                        <h4>
-                          Final Amount to Pay:
-                          <span>
-                            &#8377;{(this.calculateTotal() * 1.28).toFixed(2)}
-                          </span>
-                        </h4>
-                      </div>
-                      <div class="shopping-cart-btn btn-hover text-center">
-                        <a class="default-btn" href="#">
-                          view cart
-                        </a>
-                        <button
-                          className="default-btn"
-                          onClick={this.handleCheckout}
-                        >
-                          Checkout
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* 77777777777777777777 */}
-            </div>
-            <div class="mobile-menu-area">
-              <div class="mobile-menu">
-                <nav id="mobile-menu-active">
-                  <ul class="menu-overflow">
-                    <li>
-                      <a href="/home">HOME</a>
-                      <ul>
-                        <li>
-                          <a href="#">Collection</a>
-                          <ul>
-                            <li>
-                              <a href="#">Two Wheeler</a>
-                            </li>
-                            <li>
-                              <a href="#">Three Wheeler</a>
-                            </li>
-                            <li>
-                              <a href="#">Four Wheeler</a>
-                            </li>
-                            <li>
-                              <a href="#">Puncture Material Kit</a>
-                            </li>
-                            <li>
-                              <a href="#">Tubes</a>
-                            </li>
-                          </ul>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <a href="#">Shop</a>
-                      <ul>
-                        <li>
-                          <a href="#">Tyre Company</a>
-                          <ul>
-                            <li>
-                              <a href="https://www.mrftyres.com/">MRF</a>
-                            </li>
-                            <li>
-                              <a href="https://www.ceat.com/">CEAT</a>
-                            </li>
-                            <li>
-                              <a href="https://www.bridgestone.co.in/">
-                                Bridge Stone
-                              </a>
-                            </li>
-                            <li>
-                              <a href="https://jktyre.com/">JK Tyre</a>
-                            </li>
-                            <li>
-                              <a href="https://tvseurogrip.com/">TVS</a>
-                            </li>
-                            <li>
-                              <a href="https://www.goodyear.co.in/">GoodYear</a>
-                            </li>
-                            <li>
-                              <a href="https://www.michelin.in/">Michelin</a>
-                            </li>
-                          </ul>
-                        </li>
-                        {/* <li>
-                          <a href="#">product details</a>
-                          <ul>
-                            <li>
-                              <a href="#">tab style 1</a>
-                            </li>
-                            <li>
-                              <a href="#">tab style 2</a>
-                            </li>
-                            <li>
-                              <a href="#">tab style 3</a>
-                            </li>
-                            <li>
-                              <a href="#">sticky style</a>
-                            </li>
-                            <li>
-                              <a href="#">gallery style </a>
-                            </li>
-                            <li>
-                              <a href="#">Slider style</a>
-                            </li>
-                            <li>
-                              <a href="#">affiliate style</a>
-                            </li>
-                            <li>
-                              <a href="#">fixed image style </a>
-                            </li>
-                          </ul>
-                        </li> */}
-                      </ul>
-                    </li>
-                    {localStorage.getItem("isAdmin") === "true" ? (
-                      <li>
-                        <a>Master Admin</a>
-                        <ul>
-                          <li>
-                            <a href="/add-brand">Add Brand</a>
-                          </li>
-                          <li>
-                            <a href="/puncture-repair-list?isAdmin=true&isAdmin=true">
-                              Puncture Repair List
-                            </a>
-                          </li>
-                        </ul>
-                      </li>
-                    ) : (
-                      <></>
-                    )}
-                    <li>
-                      <a>Pages</a>
-                      <ul>
-                        <li>
-                          <a href="/about">about us</a>
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
-            </div>
-          </div>
-        </header>
+        <header></header>
         <div class="slider-area">
           <div class="slider-active owl-carousel nav-style-1 owl-dot-none">
             <div class="single-slider slider-height-1 bg-purple">
@@ -868,7 +531,7 @@ export default class HomePage extends Component {
                         2024 Collection
                       </h1>
                       <div class="slider-btn btn-hover">
-                        <a class="animated" href="#">
+                        <a class="animated" href="/#">
                           SHOP NOW
                         </a>
                       </div>
@@ -902,7 +565,7 @@ export default class HomePage extends Component {
                         ALL TIME
                       </h1>
                       <div class="slider-btn btn-hover">
-                        <a class="animated" href="#">
+                        <a class="animated" href="/#">
                           SHOP NOW
                         </a>
                       </div>
@@ -1011,7 +674,7 @@ export default class HomePage extends Component {
                 <div class="row">
                   {this.state.products
                     .filter((prod) => prod.categoryName === "Two Wheeler")
-                    .map((prod, index) => (
+                    .map((prod, index, quantity) => (
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
                           <div
@@ -1030,44 +693,62 @@ export default class HomePage extends Component {
                                 alt={`Imagee ${index}`}
                               />
                             </a>
-                            <span class="pink">{prod.discount}</span>
+                            <span
+                              class="pink"
+                              style={{
+                                userSelect: "none",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              {prod.discount}
+                            </span>
                             <div
                               class="product-action"
                               onClick={() => {
                                 this.setState({ selectedProduct: prod });
                               }}
                             >
-                              <div class="pro-same-action pro-wishlist">
-                                <a title="Wishlist" href="/">
+                              <div
+                                class="pro-same-action pro-wishlist"
+                                onClick={() => {
+                                  this.setState({ selectedProduct: prod });
+                                }}
+                              >
+                                {/* <a title="Wishlist" href="##">
                                   <i class="pe-7s-like"></i>
-                                </a>
+                                </a> */}
                               </div>
-                              {/* 000 */}
-
                               <div className="pro-same-action pro-cart">
-                                <FaMinus
-                                  style={{
-                                    backgroundColor: "white",
-                                    fontSize: "9px",
-                                  }}
-                                  onClick={() =>
-                                    this.handleRemoveFromCart2(prod)
-                                  }
-                                />
-
+                                {this.isProductInCart(prod) &&
+                                this.getProductQuantity(prod) > 0 ? (
+                                  <FaMinus
+                                    className="quantity-button minus"
+                                    onClick={() =>
+                                      this.handleRemoveFromCart2(prod)
+                                    }
+                                  />
+                                ) : null}
                                 {this.isProductInCart(prod) ? (
                                   <button
-                                    style={{ backgroundColor: "transparent" }}
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      fontSize: "14px",
+                                      textAlign: "center",
+                                      lineHeight: "1.8",
+                                    }}
                                     onClick={() => this.handleAddToCart(prod)}
                                     title="Add To Cart"
                                   >
-                                    <i className="pe-7s-cart"></i>{" "}
+                                    <i className="pe-7s-cart"></i>
                                     {this.getProductQuantity(prod)} Added In
                                     Cart
                                   </button>
                                 ) : (
                                   <button
-                                    style={{ backgroundColor: "transparent" }}
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      userSelect: "none",
+                                    }}
                                     onClick={() => this.handleAddToCart(prod)}
                                     title="Add To Cart"
                                   >
@@ -1076,11 +757,10 @@ export default class HomePage extends Component {
                                 )}
                               </div>
 
-                              {/* 000 */}
                               <div class="pro-same-action pro-quickview">
                                 <a
                                   title="Quick View"
-                                  href="/"
+                                  href="/#"
                                   data-bs-toggle="modal"
                                   data-bs-target="#exampleModal"
                                 >
@@ -1092,7 +772,7 @@ export default class HomePage extends Component {
                           <div class="product-content text-center">
                             <h5>{prod.subCategoryName}</h5>
                             <h3>
-                              <a href="/">{prod.productName}</a>
+                              <a href="/#">{prod.productName}</a>
                             </h3>
                             <h3>
                               <span>{prod.tyreSize}</span>
@@ -1118,6 +798,130 @@ export default class HomePage extends Component {
                 <div class="row">
                   {this.state.products
                     .filter((prod) => prod.categoryName === "Four Wheeler")
+                    .map((prod, index, quantity) => (
+                      <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
+                        <div class="product-wrap mb-25">
+                          <div
+                            class="product-img"
+                            style={{ userSelect: "none" }}
+                          >
+                            <a href="##" key={index}>
+                              <img
+                                className="default-img magic1"
+                                src={prod.productImages[1].dataURL}
+                                alt={`Imagee ${index}`}
+                              />
+                              <img
+                                className="hover-img"
+                                src={prod.productImages[0].dataURL}
+                                alt={`Imagee ${index}`}
+                              />
+                            </a>
+                            <span
+                              class="pink"
+                              style={{
+                                userSelect: "none",
+                                pointerEvents: "none",
+                              }}
+                            >
+                              {prod.discount}
+                            </span>
+                            <div
+                              class="product-action"
+                              onClick={() => {
+                                this.setState({ selectedProduct: prod });
+                              }}
+                            >
+                              <div
+                                class="pro-same-action pro-wishlist"
+                                onClick={() => {
+                                  this.setState({ selectedProduct: prod });
+                                }}
+                              >
+                                {/* <a title="Wishlist" href="##">
+                                  <i class="pe-7s-like"></i>
+                                </a> */}
+                              </div>
+                              <div className="pro-same-action pro-cart">
+                                {this.isProductInCart(prod) &&
+                                this.getProductQuantity(prod) > 0 ? (
+                                  <FaMinus
+                                    className="quantity-button minus"
+                                    onClick={() =>
+                                      this.handleRemoveFromCart2(prod)
+                                    }
+                                  />
+                                ) : null}
+                                {this.isProductInCart(prod) ? (
+                                  <button
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      fontSize: "14px",
+                                      textAlign: "center",
+                                      lineHeight: "1.8",
+                                    }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i>
+                                    {this.getProductQuantity(prod)} Added In
+                                    Cart
+                                  </button>
+                                ) : (
+                                  <button
+                                    style={{
+                                      backgroundColor: "transparent",
+                                      userSelect: "none",
+                                    }}
+                                    onClick={() => this.handleAddToCart(prod)}
+                                    title="Add To Cart"
+                                  >
+                                    <i className="pe-7s-cart"></i> Add to cart
+                                  </button>
+                                )}
+                              </div>
+
+                              <div class="pro-same-action pro-quickview">
+                                <a
+                                  title="Quick View"
+                                  href="/#"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#exampleModal"
+                                >
+                                  <i class="pe-7s-look"></i>
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="product-content text-center">
+                            <h5>{prod.subCategoryName}</h5>
+                            <h3>
+                              <a href="/#">{prod.productName}</a>
+                            </h3>
+                            <h3>
+                              <span>{prod.tyreSize}</span>
+                            </h3>
+                            <div class="product-rating">
+                              <i class="fa fa-star-o yellow"></i>
+                              <i class="fa fa-star-o yellow"></i>
+                              <i class="fa fa-star-o yellow"></i>
+                              <i class="fa fa-star-o"></i>
+                              <i class="fa fa-star-o"></i>
+                            </div>
+                            <div class="product-price">
+                              <span>₹ {prod.productPrice}</span>
+                              <span class="old">₹ {prod.productMrpPrice}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+              <div class="tab-pane" id="product-3">
+                <div class="row">
+                  {this.state.products
+                    .filter((prod) => prod.categoryName === "Three Wheeler")
                     .map((prod, index, quantity) => (
                       <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
                         <div class="product-wrap mb-25">
@@ -1162,37 +966,6 @@ export default class HomePage extends Component {
                                   <i class="pe-7s-like"></i>
                                 </a>
                               </div>
-                              {/* <div className="pro-same-action pro-cart">
-                                <FaMinus
-                                  style={{
-                                    backgroundColor: "white",
-                                    fontSize: "9px",
-                                  }}
-                                  onClick={() =>
-                                    this.handleRemoveFromCart2(prod)
-                                  }
-                                />
-                                {this.isProductInCart(prod) ? (
-                                  <button
-                                    style={{ backgroundColor: "transparent" }}
-                                    onClick={() => this.handleAddToCart(prod)}
-                                    title="Add To Cart"
-                                  >
-                                    <i className="pe-7s-cart"></i>{" "}
-                                    {this.getProductQuantity(prod)} Added In
-                                    Cart
-                                  </button>
-                                ) : (
-                                  <button
-                                    style={{ backgroundColor: "transparent" }}
-                                    onClick={() => this.handleAddToCart(prod)}
-                                    title="Add To Cart"
-                                  >
-                                    <i className="pe-7s-cart"></i> Add to cart
-                                  </button>
-                                )}
-                              </div> */}
-
                               <div className="pro-same-action pro-cart">
                                 {this.isProductInCart(prod) &&
                                 this.getProductQuantity(prod) > 0 ? (
@@ -1235,7 +1008,7 @@ export default class HomePage extends Component {
                               <div class="pro-same-action pro-quickview">
                                 <a
                                   title="Quick View"
-                                  href="#"
+                                  href="/#"
                                   data-bs-toggle="modal"
                                   data-bs-target="#exampleModal"
                                 >
@@ -1247,118 +1020,7 @@ export default class HomePage extends Component {
                           <div class="product-content text-center">
                             <h5>{prod.subCategoryName}</h5>
                             <h3>
-                              <a href="#">{prod.productName}</a>
-                            </h3>
-                            <h3>
-                              <span>{prod.tyreSize}</span>
-                            </h3>
-                            <div class="product-rating">
-                              <i class="fa fa-star-o yellow"></i>
-                              <i class="fa fa-star-o yellow"></i>
-                              <i class="fa fa-star-o yellow"></i>
-                              <i class="fa fa-star-o"></i>
-                              <i class="fa fa-star-o"></i>
-                            </div>
-                            <div class="product-price">
-                              <span>₹ {prod.productPrice}</span>
-                              <span class="old">₹ {prod.productMrpPrice}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-              <div class="tab-pane" id="product-3">
-                <div class="row">
-                  {this.state.products
-                    .filter((prod) => prod.categoryName === "Three Wheeler")
-                    .map((prod, index) => (
-                      <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
-                        <div class="product-wrap mb-25">
-                          <div
-                            class="product-img"
-                            style={{ userSelect: "none" }}
-                          >
-                            {/* <a href="#">
-                                                <img class="default-img" src="assets/img/product/Ceat6.webp" alt=""/>
-                                                <img class="hover-img" src="assets/img/product/Ceat7.webp" alt=""/>
-                                            </a> */}
-
-                            <a href="#" key={index}>
-                              <img
-                                className="default-img"
-                                src={prod.productImages[1].dataURL}
-                                alt={`Image ${index}`}
-                              />
-                              <img
-                                className="hover-img"
-                                src={prod.productImages[0].dataURL}
-                                alt={`Image ${index}`}
-                              />
-                            </a>
-                            <span class="pink">{prod.discount}</span>
-                            <div
-                              class="product-action"
-                              onClick={() => {
-                                this.setState({ selectedProduct: prod });
-                              }}
-                            >
-                              <div class="pro-same-action pro-wishlist">
-                                <a title="Wishlist" href="##">
-                                  <i class="pe-7s-like"></i>
-                                </a>
-                              </div>
-                              {/* 0000 */}
-
-                              <div className="pro-same-action pro-cart">
-                                <FaMinus
-                                  style={{
-                                    backgroundColor: "white",
-                                    fontSize: "9px",
-                                  }}
-                                  onClick={() =>
-                                    this.handleRemoveFromCart2(prod)
-                                  }
-                                />
-                                {this.isProductInCart(prod) ? (
-                                  <button
-                                    style={{ backgroundColor: "transparent" }}
-                                    onClick={() => this.handleAddToCart(prod)}
-                                    title="Add To Cart"
-                                  >
-                                    <i className="pe-7s-cart"></i>{" "}
-                                    {this.getProductQuantity(prod)} Added In
-                                    Cart
-                                  </button>
-                                ) : (
-                                  <button
-                                    style={{ backgroundColor: "transparent" }}
-                                    onClick={() => this.handleAddToCart(prod)}
-                                    title="Add To Cart"
-                                  >
-                                    <i className="pe-7s-cart"></i> Add to cart
-                                  </button>
-                                )}
-                              </div>
-
-                              {/* 000 */}
-                              <div class="pro-same-action pro-quickview">
-                                <a
-                                  title="Quick View"
-                                  href="#"
-                                  data-bs-toggle="modal"
-                                  data-bs-target="#exampleModal"
-                                >
-                                  <i class="pe-7s-look"></i>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="product-content text-center">
-                            <h5>{prod.subCategoryName}</h5>
-                            <h3>
-                              <a href="#">{prod.productName}</a>
+                              <a href="/#">{prod.productName}</a>
                             </h3>
                             <h3>
                               <span>{prod.tyreSize}</span>
@@ -1388,7 +1050,123 @@ export default class HomePage extends Component {
             <div class="section-title text-center mb-55">
               <h2>OUR BLOG</h2>
             </div>
-            <div class="row"></div>
+            {/* <div class="row"></div> */}
+            <div class="row">
+              {this.state.products
+                .filter((prod) => prod.categoryName)
+                .map((prod, index, quantity) => (
+                  <div class="col-xl-3 col-md-6 col-lg-4 col-sm-6">
+                    <div class="product-wrap mb-25">
+                      <div class="product-img" style={{ userSelect: "none" }}>
+                        <a href="##" key={index}>
+                          <img
+                            className="default-img"
+                            src={prod.productImages[0].dataURL}
+                            alt={`Imagee ${index}`}
+                          />
+                          <img
+                            className="hover-img"
+                            src={prod.productImages[1].dataURL}
+                            alt={`Imagee ${index}`}
+                          />
+                        </a>
+                        <span
+                          class="pink"
+                          style={{
+                            userSelect: "none",
+                            pointerEvents: "none",
+                          }}
+                        >
+                          {prod.discount}
+                        </span>
+                        <div
+                          class="product-action"
+                          onClick={() => {
+                            this.setState({ selectedProduct: prod });
+                          }}
+                        >
+                          <div
+                            class="pro-same-action pro-wishlist"
+                            onClick={() => {
+                              this.setState({ selectedProduct: prod });
+                            }}
+                          >
+                            <a title="Wishlist" href="##">
+                              <i class="pe-7s-like"></i>
+                            </a>
+                          </div>
+                          <div className="pro-same-action pro-cart">
+                            {this.isProductInCart(prod) &&
+                            this.getProductQuantity(prod) > 0 ? (
+                              <FaMinus
+                                className="quantity-button minus"
+                                onClick={() => this.handleRemoveFromCart2(prod)}
+                              />
+                            ) : null}
+                            {this.isProductInCart(prod) ? (
+                              <button
+                                style={{
+                                  backgroundColor: "transparent",
+                                  fontSize: "14px",
+                                  textAlign: "center",
+                                  lineHeight: "1.8",
+                                }}
+                                onClick={() => this.handleAddToCart(prod)}
+                                title="Add To Cart"
+                              >
+                                <i className="pe-7s-cart"></i>
+                                {this.getProductQuantity(prod)} Added In Cart
+                              </button>
+                            ) : (
+                              <button
+                                style={{
+                                  backgroundColor: "transparent",
+                                  userSelect: "none",
+                                }}
+                                onClick={() => this.handleAddToCart(prod)}
+                                title="Add To Cart"
+                              >
+                                <i className="pe-7s-cart"></i> Add to cart
+                              </button>
+                            )}
+                          </div>
+
+                          <div class="pro-same-action pro-quickview">
+                            <a
+                              title="Quick View"
+                              href="/#"
+                              data-bs-toggle="modal"
+                              data-bs-target="#exampleModal"
+                            >
+                              <i class="pe-7s-look"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="product-content text-center">
+                        <h5>{prod.subCategoryName}</h5>
+                        <h3>
+                          <a href="/#">{prod.productName}</a>
+                        </h3>
+                        <h3>
+                          <span>{prod.tyreSize}</span>
+                        </h3>
+                        <div class="product-rating">
+                          <i class="fa fa-star-o yellow"></i>
+                          <i class="fa fa-star-o yellow"></i>
+                          <i class="fa fa-star-o yellow"></i>
+                          <i class="fa fa-star-o"></i>
+                          <i class="fa fa-star-o"></i>
+                        </div>
+                        <div class="product-price">
+                          <span>₹ {prod.productPrice}</span>
+                          <span class="old">₹ {prod.productMrpPrice}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
         <footer class="footer-area bg-gray pt-100 pb-70">
@@ -1397,7 +1175,7 @@ export default class HomePage extends Component {
               <div class="col-lg-2 col-md-4 col-sm-4">
                 <div class="copyright mb-30">
                   <div class="footer-logo">
-                    <a href="#">
+                    <a href="/#">
                       <img
                         alt=""
                         src="assets/img/logo/tyrelogo.jpg"
@@ -1406,7 +1184,7 @@ export default class HomePage extends Component {
                     </a>
                   </div>
                   <p>
-                    © 2024 <a href="#">Tyrewala</a>.<br /> All Rights Reserved
+                    © 2024 <a href="/#">Tyrewala</a>.<br /> All Rights Reserved
                   </p>
                 </div>
               </div>
@@ -1424,10 +1202,10 @@ export default class HomePage extends Component {
                         <a href="/">Store location : Jogeshwari Mumbai(102)</a>
                       </li>
                       <li>
-                        <a href="#">Contact : ashwinmaurya9211@gmail.com</a>
+                        <a href="/#">Contact : ashwinmaurya9211@gmail.com</a>
                       </li>
                       {/* <li>
-                        <a href="#">Orders tracking</a>
+                        <a href="/#">Orders tracking</a>
                       </li> */}
                     </ul>
                   </div>
@@ -1441,16 +1219,16 @@ export default class HomePage extends Component {
                   <div class="footer-list">
                     <ul>
                       <li>
-                        <a href="#">Returns</a>
+                        <a href="/#">Returns</a>
                       </li>
                       <li>
-                        <a href="#">Support Policy</a>
+                        <a href="/#">Support Policy</a>
                       </li>
                       <li>
-                        <a href="#">Size guide</a>
+                        <a href="/#">Size guide</a>
                       </li>
                       <li>
-                        <a href="#">FAQs</a>
+                        <a href="/#">FAQs</a>
                       </li>
                     </ul>
                   </div>
@@ -1579,11 +1357,10 @@ export default class HomePage extends Component {
             </div>
           </div>
         </footer>
-
         {/* Modal */}
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog">
           <div class="modal-dialog" role="document">
-            <div class="modal-content">
+            <div class="modal-content" style={{ maxWidth: "100%" }}>
               <div class="modal-header">
                 <button
                   type="button"
@@ -1602,13 +1379,22 @@ export default class HomePage extends Component {
                   <div class="row">
                     <div class="col-md-5 col-sm-12 col-xs-12">
                       <div class="tab-content quickview-big-img">
-                        <div id="pro-1" class="tab-pane fade show active">
+                        <div
+                          id="pro-1"
+                          class="tab-pane fade show active img-container"
+                          onMouseEnter={this.handleImageLoad}
+                          onMouseLeave={() => this.setState({ cx: 0, cy: 0 })}
+                        >
                           <img
+                            title="tyre-image"
                             src={
-                              this.state.selectedProduct.productImages[0]
-                                .dataURL
+                              this.state.selectedProduct?.productImages[0]
+                                ?.dataURL || ""
                             }
                             alt=""
+                            ref={this.imgRef}
+                            onMouseEnter={() => this.handleHover(true)}
+                            onMouseLeave={() => this.handleHover(false)}
                           />
                         </div>
                         {this.state.selectedProduct.productImages.map(
@@ -1689,9 +1475,7 @@ export default class HomePage extends Component {
                         </div>
                       </div>
                     </div>
-                    {/* {this.state.products
-                    .filter((prod) => prod.categoryName === "Four Wheeler")
-                    .map((prod, index) => ( */}
+
                     {this.state.selectedProduct && (
                       <div
                         class="col-md-7 col-sm-12 col-xs-12"
@@ -1700,6 +1484,13 @@ export default class HomePage extends Component {
                         }
                       >
                         <div class="product-details-content quickview-content">
+                          {/* {isHovered && ( */}
+                          <div
+                            id="myresult"
+                            ref={this.resultRef}
+                            className="img-zoom-result"
+                          ></div>
+                          {/* )} */}
                           <h2>{this.state.selectedProduct.brandName}</h2>
                           <div class="product-details-price">
                             <span>
@@ -1746,67 +1537,139 @@ export default class HomePage extends Component {
                               {/* <div class="pro-details-size-content">
                                 <ul>
                                   <li>
-                                    <a href="#">s</a>
+                                    <a href="/#">s</a>
                                   </li>
                                   <li>
-                                    <a href="#">m</a>
+                                    <a href="/#">m</a>
                                   </li>
                                   <li>
-                                    <a href="#">l</a>
+                                    <a href="/#">l</a>
                                   </li>
                                   <li>
-                                    <a href="#">xl</a>
+                                    <a href="/#">xl</a>
                                   </li>
                                   <li>
-                                    <a href="#">xxl</a>
+                                    <a href="/#">xxl</a>
                                   </li>
                                 </ul>
                               </div> */}
                             </div>
                           </div>
-                          <div class="pro-details-quality">
-                            <div class="cart-plus-minus">
-                              <input
-                                class="cart-plus-minus-box"
-                                type="text"
-                                name="qtybutton"
-                                value="2"
-                              />
-                            </div>
-                            <div class="pro-details-cart btn-hover">
-                              <a
-                                href="#"
-                                onClick={() =>
-                                  this.handleAddToCart(
+                          <div class="pro-details-quality" style={{}}>
+                            <div class="pro-details-cart btn-hover" style={{}}>
+                              {this.isProductInCart(
+                                this.state.selectedProduct
+                              ) &&
+                              this.getProductQuantity(
+                                this.state.selectedProduct
+                              ) > 0 ? (
+                                <div
+                                  className="remove-button-container"
+                                  style={{
+                                    marginLeft: "-25px",
+                                    marginBottom: "-35px",
+                                    paddingRight: "5px",
+                                  }}
+                                >
+                                  <FaMinus
+                                    style={{}}
+                                    title="Remove"
+                                    className="quantity-button minus"
+                                    onClick={() =>
+                                      this.handleRemoveFromCart2(
+                                        this.state.selectedProduct
+                                      )
+                                    }
+                                  />
+                                </div>
+                              ) : null}
+                              {this.isProductInCart(
+                                this.state.selectedProduct
+                              ) ? (
+                                <button
+                                  style={{
+                                    backgroundColor: "blue",
+                                    marginTop: "0px",
+                                  }}
+                                  onClick={() =>
+                                    this.handleAddToCart(
+                                      this.state.selectedProduct
+                                    )
+                                  }
+                                  title="Add To Cart"
+                                >
+                                  <i className="pe-7s-cart"></i>{" "}
+                                  {this.getProductQuantity(
                                     this.state.selectedProduct
-                                  )
-                                }
-                              >
-                                Add To Cart
-                              </a>
+                                  )}
+                                  Added In Cart
+                                </button>
+                              ) : (
+                                <button
+                                  style={{
+                                    backgroundColor: "blue",
+                                    marginTop: "0px",
+                                  }}
+                                  onClick={() =>
+                                    this.handleAddToCart(
+                                      this.state.selectedProduct
+                                    )
+                                  }
+                                  title="Add To Cart"
+                                >
+                                  <i className="pe-7s-cart"></i>
+                                  &nbsp;&nbsp;&nbsp;Add To
+                                  Cart&nbsp;&nbsp;&nbsp;
+                                </button>
+                              )}
                             </div>
-                            <div class="pro-details-wishlist">
-                              <a href="#">
+                            <div style={{}}>
+                              <button
+                                style={{
+                                  backgroundColor: "blue",
+                                  marginTop: "-3px",
+                                  borderRadius: "115px",
+                                }}
+                              >
+                                <a
+                                  href="/cart-page"
+                                  className="view-cart"
+                                  style={{
+                                    color: "white",
+                                    textDecoration: "none",
+                                  }}
+                                >
+                                  View Cart
+                                </a>
+                              </button>
+                            </div>
+
+                            <div
+                              class="pro-details-wishlist"
+                              style={{ paddingLeft: "5px" }}
+                            >
+                              <a href="/#">
                                 <i class="fa fa-heart-o"></i>
                               </a>
                             </div>
                             <div class="pro-details-compare">
-                              <a href="#">
+                              <a href="/#">
                                 <i class="pe-7s-shuffle"></i>
                               </a>
                             </div>
                           </div>
+
                           {/* <div class="pro-details-meta">
                             <span>Categories :</span>
                             <ul>
                               <li>
-                                <a href="#">Minimal,</a>
+                                <a href="/#">Minimal,</a>
                               </li>
                               <li>
-                                <a href="#"></a>
+                                <a href="/#"></a>
                               </li>
                               <li>
-                                <a href="#"></a>
+                                <a href="/#"></a>
                               </li>
                             </ul>
                           </div> */}
@@ -1814,16 +1677,17 @@ export default class HomePage extends Component {
                             <span>Tag :</span>
                             <ul>
                               <li>
-                                <a href="#"> </a>
+                                <a href="/#"> </a>
                               </li>
                               <li>
-                                <a href="#"></a>
+                                <a href="/#"></a>
                               </li>
                               <li>
-                                <a href="#"></a>
+                                <a href="/#"></a>
                               </li>
                             </ul>
                           </div> */}
+
                           <div class="pro-details-social">
                             <ul>
                               <li>
@@ -1837,7 +1701,7 @@ export default class HomePage extends Component {
                                 </a>
                               </li>
                               <li>
-                                <a href="#">
+                                <a href="/#">
                                   <i class="fa fa-twitter"></i>
                                 </a>
                               </li>
@@ -1858,7 +1722,7 @@ export default class HomePage extends Component {
             </div>
           </div>
         </div>
-        {/* Modal end */}
+        {!localStorage.getItem("userEmail") && <MainPopup />}
       </div>
     );
   }

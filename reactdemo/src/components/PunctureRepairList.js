@@ -2,6 +2,9 @@
 import React, { Component } from "react";
 import axios from "axios";
 import "../css/PunctureRepair.css";
+import { toast } from "react-toastify";
+import DeleteConfirmationPopup from "./DeleteConfirmationPopup.js";
+
 import {
   FaMapMarkerAlt,
   FaPhone,
@@ -9,7 +12,10 @@ import {
   FaTools,
   FaInfoCircle,
   FaRupeeSign,
+  FaExclamationCircle,
+  FaTrash,
 } from "react-icons/fa";
+import { IoMdTime } from "react-icons/io";
 
 class PunctureRepairList extends Component {
   constructor(props) {
@@ -21,15 +27,89 @@ class PunctureRepairList extends Component {
       mobileNumber: "",
       isAdmin: false,
       totalAmount: 0,
+      reloadTimer: localStorage.getItem("reloadTimer") || null, // Initial value of reload timer (in seconds)
+      deleteConfirmation: {
+        isOpen: false,
+        repairId: null,
+        mobileNumber: "",
+      },
+      currentPage: 1,
+      itemsPerPage: 5,
     };
+    this.socket = new WebSocket("ws://localhost:8080"); // Replace with your server URL
 
     const params = new URLSearchParams(window.location.search);
     console.log(params.get("isAdmin"));
     this.state.mobileNumber = params.get("mob");
     this.state.isAdmin = params.get("isAdmin");
   }
+  nextPage = () => {
+    this.setState((prevState) => ({
+      currentPage: prevState.currentPage + 1,
+    }));
+  };
+
+  prevPage = () => {
+    this.setState((prevState) => ({
+      currentPage: prevState.currentPage - 1,
+    }));
+  };
+
+  handleDeleteConfirmation = (_id, mobileNumber) => {
+    this.setState({
+      deleteConfirmation: {
+        isOpen: true,
+        repairId: _id,
+        mobileNumber: mobileNumber,
+      },
+    });
+  };
+
+  handleDeleteCancel = () => {
+    this.setState({
+      deleteConfirmation: {
+        isOpen: false,
+        repairId: null,
+        mobileNumber: "",
+      },
+    });
+  };
+
+  handleDeleteConfirm = async () => {
+    const { repairId, mobileNumber } = this.state.deleteConfirmation;
+    if (this.state.mobileNumber !== mobileNumber) {
+      toast.error("Mobile number does not match. Cannot delete repair.");
+      return;
+    }
+    const response = await axios.delete(
+      process.env.REACT_APP_API_URL + `punctureRepair/deleteRepair/${repairId}`
+    );
+    console.log("RESPONSE", response);
+
+    try {
+      if (response.status === 200) {
+        this.setState((prevState) => ({
+          punctureRepairs: prevState.punctureRepairs.filter(
+            (repair) => repair._id !== repairId
+          ),
+        }));
+        toast.success("Repair deleted successfully.");
+      } else {
+        // Display an error toast message if the deletion failed
+        toast.error("Failed to deleted");
+      }
+    } catch (error) {
+      console.error("Error deleting repair:", error);
+      toast.error("Failed to delete repair.");
+    }
+
+    // Close the delete confirmation dialog
+    this.handleDeleteCancel();
+  };
 
   componentDidMount() {
+    this.socket.addEventListener("message", this.handleSocketMessage);
+
     if (this.state.mobileNumber) {
       this.fetchPunctureRepairsByMobile();
     } else if (this.state.isAdmin) {
@@ -37,6 +117,26 @@ class PunctureRepairList extends Component {
     }
     this.getAllStatusStr();
   }
+
+  componentWillUnmount() {
+    // Clear the interval when component unmounts to prevent memory leaks
+    clearInterval(this.timerID);
+    this.socket.close();
+  }
+  handleSocketMessage = (event) => {
+    try {
+      // Handle incoming status updates from the server
+      const updatedRepair = JSON.parse(event.data);
+      this.setState((prevState) => ({
+        punctureRepairs: prevState.punctureRepairs.map((repair) =>
+          repair._id === updatedRepair._id ? updatedRepair : repair
+        ),
+      }));
+    } catch (error) {
+      console.error("Error parsing JSON in handleSocketMessage:", error);
+      // Handle the parsing error gracefully...
+    }
+  };
 
   getAllStatusStr = async () => {
     try {
@@ -53,18 +153,75 @@ class PunctureRepairList extends Component {
 
   fetchPunctureRepairsByMobile = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
+      // Check if session has expired
+      const lastSubmissionTime = localStorage.getItem("lastSubmissionTime");
+      if (lastSubmissionTime) {
+        const currentTime = new Date().getTime();
+        const elapsedTime = currentTime - parseInt(lastSubmissionTime);
+        console.log("Elapsed time:", elapsedTime); // Add this line
 
-      console.log("Fetchingjjgjhdgshdds " + apiUrl);
-      const response = await axios.get(
-        process.env.REACT_APP_API_URL +
-          `punctureRepair/getPunctureRepairByMobileList/${this.state.mobileNumber}`
-      );
-      console.log("Request for Repairing", response.data);
-      this.setState({ punctureRepairs: response.data, loading: false });
+        const sessionExpirationTime = 2 * 60 * 60 * 1000;
+        // 2 hours in milliseconds
+        // const sessionExpirationTime = 3 * 1000;
+        // 30 seconds in milliseconds
+        console.log("Session expiration time:", sessionExpirationTime); // Add this line
+
+        if (elapsedTime >= sessionExpirationTime) {
+          // Session is still valid, show error message or take appropriate action
+          localStorage.removeItem("lastSubmissionTime");
+        } else {
+          // const apiUrl = process.env.REACT_APP_API_URL;
+
+          // console.log("API " + apiUrl);
+          const response = await axios.get(
+            process.env.REACT_APP_API_URL +
+              `punctureRepair/getPunctureRepairByMobileList/${this.state.mobileNumber}`
+          );
+          console.log("Request for Repairing", response.data);
+          const repairList = response.data;
+          if (repairList.length > 0) {
+            this.setState(
+              {
+                punctureRepairs: repairList,
+                loading: false,
+                reloadTimer: Math.floor(
+                  (sessionExpirationTime - elapsedTime) / 1000
+                ), // Set reload timer based on remaining time
+                fetchPunctureRepairsByMobileCalled: true,
+              },
+              () => {
+                // Start countdown timer
+                this.timerID = setInterval(() => {
+                  this.setState(
+                    (prevState) => ({
+                      reloadTimer:
+                        prevState.reloadTimer > 0
+                          ? prevState.reloadTimer - 1
+                          : 0,
+                    }),
+                    () => {
+                      // Update localStorage with new timer value
+                      localStorage.setItem(
+                        "reloadTimer",
+                        this.state.reloadTimer
+                      );
+                    }
+                  );
+                }, 1000); // Update timer every second
+              }
+            );
+          } else {
+            // Clear the interval if no puncture repairs are fetched
+            clearInterval(this.timerID);
+          }
+
+          return;
+        }
+      }
+
+      toast.error("Session has expired. Please try again later.");
     } catch (error) {
       console.error("Error fetching puncture repairs:", error);
-      // Handle error
     }
   };
 
@@ -74,27 +231,30 @@ class PunctureRepairList extends Component {
         process.env.REACT_APP_API_URL + "punctureRepair/getPunctureRepairList"
       );
       console.log("Request for Repairing", response.data);
-      this.setState({ punctureRepairs: response.data, loading: false });
+      const repairList = response.data.reverse();
+
+      this.setState({ punctureRepairs: repairList, loading: false });
     } catch (error) {
       console.error("Error fetching puncture repairs:", error);
       // Handle error
     }
   };
 
-  handleRepairStatusChange = async (id, status) => {
+  handleRepairStatusChange = async (_id, status) => {
     try {
       // Update the repair status locally
       this.setState((prevState) => ({
         punctureRepairs: prevState.punctureRepairs.map((repair) =>
-          repair.id === id ? { ...repair, status } : repair
+          repair._id === _id ? { ...repair, status } : repair
         ),
       }));
 
       console.log(this.state.totalAmount);
+      this.socket.send(JSON.stringify({ _id, status }));
 
       await axios.put(
         process.env.REACT_APP_API_URL +
-          `punctureRepair/updateRepairStatus/${id}/${status}`,
+          `punctureRepair/updateRepairStatus/${_id}/${status}`,
         { status }
       );
     } catch (error) {
@@ -103,13 +263,13 @@ class PunctureRepairList extends Component {
     }
   };
 
-  handleTotalAmtChange = async (e, id, repair, amt) => {
+  handleTotalAmtChange = async (e, _id, repair, amt) => {
     try {
       // Update the repair status locally
       repair.totalAmount = amt;
       this.setState((prevState) => ({
         punctureRepairs: prevState.punctureRepairs.map((repair) =>
-          repair.id === id ? { ...repair, totalAmount: amt } : repair
+          repair._id === _id ? { ...repair, totalAmount: amt } : repair
         ),
       }));
 
@@ -118,7 +278,7 @@ class PunctureRepairList extends Component {
 
       await axios.put(
         process.env.REACT_APP_API_URL +
-          `punctureRepair/updateAmout/${id}/${amt}`,
+          `punctureRepair/updateAmout/${_id}/${amt}`,
         { amt }
       );
     } catch (error) {
@@ -148,10 +308,28 @@ class PunctureRepairList extends Component {
   };
 
   render() {
-    const { punctureRepairs, loading } = this.state;
+    const {
+      punctureRepairs,
+      loading,
+      reloadTimer,
+      fetchPunctureRepairsByMobileCalled,
+      deleteConfirmation,
+      currentPage,
+      itemsPerPage,
+    } = this.state;
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = punctureRepairs.slice(
+      indexOfFirstItem,
+      indexOfLastItem
+    );
 
     if (loading) {
-      return <div>Loading...</div>; // Render loading indicator while fetching data
+      return (
+        <div>
+          <h1>Loading...</h1>
+        </div>
+      );
     }
 
     return (
@@ -185,16 +363,42 @@ class PunctureRepairList extends Component {
             Status
           </span>
         </div>
+
+        {fetchPunctureRepairsByMobileCalled &&
+          reloadTimer !== null && ( // Display countdown timer only if reload timer is set
+            <div className="reload-timer">
+              {reloadTimer > 0 ? (
+                <div
+                  style={{
+                    color: reloadTimer < 3600 ? "orange" : "green",
+                    fontWeight: "bold",
+                  }}
+                  className={reloadTimer < 3600 ? "blinking" : ""}
+                >
+                  Session will expire in{" "}
+                  {`${Math.floor(reloadTimer / 3600)}:${Math.floor(
+                    (reloadTimer % 3600) / 60
+                  )}:${reloadTimer % 60}`}{" "}
+                  <IoMdTime className="time-icon" />
+                </div>
+              ) : (
+                <div style={{ color: "red", fontWeight: "bold" }}>
+                  <FaExclamationCircle className="time-icon" /> Session
+                  Expired...Refresh the Page
+                </div>
+              )}
+            </div>
+          )}
         <ul className="puncture-repair-list">
-          {punctureRepairs.map((repair) => (
-            <li key={repair.id} className="puncture-repair-item">
+          {currentItems.map((repair) => (
+            <li key={repair._id} className="puncture-repair-item">
               <span>{repair.location}</span>
               <span>{repair.mobileNumber}</span>
               <span>{repair.vehiclePlateNo}</span>
               <span>
                 {/* <>&#8377;</>   */}
                 <input
-                  disabled={!this.state.isAdmin}
+                  disabled={!this.state.isAdmin || repair.status === "Success"}
                   type="number"
                   onKeyPress={this.restrictToNumbers}
                   className="form-control"
@@ -203,7 +407,7 @@ class PunctureRepairList extends Component {
                   onChange={(e) =>
                     this.handleTotalAmtChange(
                       e,
-                      repair.id,
+                      repair._id,
                       repair,
                       e.target.value
                     )
@@ -213,29 +417,109 @@ class PunctureRepairList extends Component {
               {this.state.isAdmin ? (
                 <span>
                   <select
+                    title="status update"
                     value={repair.status}
                     onChange={(e) =>
-                      this.handleRepairStatusChange(repair.id, e.target.value)
+                      this.handleRepairStatusChange(repair._id, e.target.value)
                     }
                     className={
                       repair.status === "In Progress"
-                        ? "red"
-                        : repair.status === "On Process"
                         ? "orange"
-                        : "green"
+                        : repair.status === "Rejected"
+                        ? "red"
+                        : repair.status === "Success" ||
+                          repair.status === "Approved"
+                        ? "green"
+                        : repair.status === "Failed To Repair"
+                        ? "red"
+                        : "blue"
                     }
                   >
                     {this.state.statusStr.map((str, index2) => (
                       <option value={str}> &#x25CF; {str}</option>
                     ))}
                   </select>
+                  <FaTrash
+                    title="delete the repair details"
+                    onClick={() =>
+                      this.handleDeleteConfirmation(
+                        repair._id,
+                        repair.mobileNumber
+                      )
+                    }
+                  />
                 </span>
               ) : (
-                <span>{repair.status}</span>
+                <span>
+                  <select
+                    disabled
+                    className={
+                      repair.status === "In Progress"
+                        ? "orange"
+                        : repair.status === "Rejected"
+                        ? "red"
+                        : repair.status === "Success" ||
+                          repair.status === "Approved"
+                        ? "green"
+                        : repair.status === "Failed To Repair"
+                        ? "red"
+                        : "blue"
+                    }
+                    style={{
+                      appearance: "none",
+                      paddingLeft: "20px",
+                    }}
+                  >
+                    <option>{repair.status}</option>
+                  </select>
+                </span>
               )}
             </li>
           ))}
         </ul>
+        {!fetchPunctureRepairsByMobileCalled ? (
+          <div>
+            <strong>
+              Item : {indexOfFirstItem + 1} -{" "}
+              {Math.min(indexOfLastItem, this.state.punctureRepairs.length)} of{" "}
+              {this.state.punctureRepairs.length}
+            </strong>
+            <strong style={{ marginLeft: "80%" }}>Page : {currentPage}</strong>
+          </div>
+        ) : (
+          <></>
+        )}
+
+        {!fetchPunctureRepairsByMobileCalled ? (
+          <div className="pagination" style={{ paddingBottom: "10px" }}>
+            <button
+              style={{ width: "30%", marginLeft: "150px" }}
+              onClick={this.prevPage}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <button
+              style={{ width: "30%", marginLeft: "200px" }}
+              onClick={this.nextPage}
+              disabled={indexOfLastItem >= this.state.punctureRepairs.length}
+            >
+              Next
+            </button>
+          </div>
+        ) : (
+          <></>
+        )}
+
+        <DeleteConfirmationPopup
+          isOpen={deleteConfirmation.isOpen}
+          mobileNumber={deleteConfirmation.mobileNumber}
+          onCancel={this.handleDeleteCancel}
+          onConfirm={this.handleDeleteConfirm}
+          onMobileNumberChange={(e) =>
+            this.setState({ mobileNumber: e.target.value })
+          }
+        />
       </div>
     );
   }

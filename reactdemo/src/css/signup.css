@@ -1,10 +1,10 @@
 /* Container holding the sign-up form */
   
   
-form {
+form ,.form{
     max-width: 400px; /* Adjust as needed */
     margin: 0 auto;
-    padding: 10px;
+    padding: 25px;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }

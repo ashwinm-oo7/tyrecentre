@@ -67,13 +67,13 @@ function CategoryList() {
     setIsModalOpen(false);
   };
 
-  const handleUpdate = async (updatedData, param) => {
+  const handleUpdate = async (_id, updatedData, param) => {
     try {
       let apirUrl = "";
       if (param === "subCategoryData") {
-        apirUrl = process.env.REACT_APP_API_URL + "subcategory/update";
+        apirUrl = process.env.REACT_APP_API_URL + `subcategory/update/${_id}`;
       } else if (param === "categoryData") {
-        apirUrl = process.env.REACT_APP_API_URL + "category/update";
+        apirUrl = process.env.REACT_APP_API_URL + `category/update/${_id}`;
       }
       const response = await fetch(apirUrl, {
         method: "PUT", // Use PUT or PATCH depending on your API endpoint
@@ -100,7 +100,7 @@ function CategoryList() {
     try {
       // Send delete request to backend to delete subcategory
       const response = await fetch(
-        process.env.REACT_APP_API_URL + `subcategory/delete/${subcategory.id}`,
+        process.env.REACT_APP_API_URL + `subcategory/delete/${subcategory._id}`,
         {
           // Use subcategory.id
           method: "DELETE",
@@ -115,12 +115,12 @@ function CategoryList() {
         setCategoryData((prevCategoryData) => {
           const updatedCategoryData = prevCategoryData.map((category) => {
             if (
-              category.subcategories.some((sub) => sub.id === subcategory.id)
+              category.subcategories.some((sub) => sub._id === subcategory._id)
             ) {
               return {
                 ...category,
                 subcategories: category.subcategories.filter(
-                  (sub) => sub.id !== subcategory.id
+                  (sub) => sub._id !== subcategory._id
                 ),
               };
             }

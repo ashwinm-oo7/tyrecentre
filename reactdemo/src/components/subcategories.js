@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Link } from "react-router-dom";
-
+import { FaHome } from "react-icons/fa";
 class Subcategories extends Component {
   constructor(props) {
     super(props);
@@ -164,7 +164,7 @@ class Subcategories extends Component {
         {/* 888888888888888888888888888888888888888888888888888888888888 */}
 
         <br />
-        <div style={{ backgroundColor: "lightblue", padding: "10px" }}>
+        <div style={{ backgroundColor: "", padding: "10px" }}>
           <label>
             SubCategory Name<span style={{ color: "red" }}>*</span>:
             <input
@@ -190,22 +190,28 @@ class Subcategories extends Component {
             disabled={isSubCategoryNameEmpty}
             style={{
               marginRight: "0.5cm",
-              backgroundColor: "red",
+              backgroundColor: "",
               color: "white",
             }}
           >
             Add
           </button>
 
-          <button
+          {/* <button
             onClick={this.handleCloseButtonClick}
             style={{ backgroundColor: "red", color: "white" }}
           >
             Close
-          </button>
+          </button> */}
 
-          <p className="next-subcategory">
-            <Link to="/categories">Back</Link>
+          <p
+            className="next-subcategory"
+            style={{ marginLeft: "85px", padding: "50px" }}
+          >
+            <Link to="/home">
+              <FaHome />
+              Home
+            </Link>
           </p>
         </div>
       </div>

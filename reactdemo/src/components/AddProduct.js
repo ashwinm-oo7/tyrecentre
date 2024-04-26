@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import "../css/ProductImage.css";
-import { FaTimes } from "react-icons/fa"; // Import pencil icon from react-icons library
+import { FaTimes, FaHome } from "react-icons/fa"; // Import pencil icon from react-icons library
 import Multiselect from "multiselect-react-dropdown";
 
 const fileToBase64 = (file) => {
@@ -44,6 +44,7 @@ class AddProduct extends Component {
       disabled: false,
       vehicleBrandModels: [],
       tyreSize: "",
+      iaAdmin: false,
     };
     this.state.productIdToUpdate = "";
     const params = new URLSearchParams(window.location.search);
@@ -96,13 +97,20 @@ class AddProduct extends Component {
         this.fetchSubCategoryOptions(productData.categoryName);
       }
       if (productData.subCategoryName) {
-        this.fetchTyreCompanyOptions(productData.subCategoryName);
+        this.fetchTyreCompanyOptions(
+          productData.subCategoryName,
+          productData.categoryName
+        );
       }
     }, 100);
   };
 
   componentDidMount() {
-    this.fetchCategoryOptions();
+    const isAdmin = localStorage.getItem("isAdmin");
+    this.setState({ isAdmin });
+    if (isAdmin) {
+      this.fetchCategoryOptions();
+    }
   }
 
   fetchCategoryOptions = async () => {
@@ -210,11 +218,11 @@ class AddProduct extends Component {
     this.fetchSubCategoryOptions(selectedCategory);
   };
   // *************************GET TYRE Company*********************************************************************
-  fetchTyreCompanyOptions = async (selectedSubCategory) => {
+  fetchTyreCompanyOptions = async (selectedSubCategory, selectedCategory) => {
     try {
       const response = await fetch(
         process.env.REACT_APP_API_URL +
-          `brand/getTyreCompanyBySubcategoryName/${selectedSubCategory}`,
+          `brand/getTyreCompanyBySubcategoryName/${selectedCategory}/${selectedSubCategory}`,
         {
           method: "GET",
           headers: {
@@ -223,7 +231,7 @@ class AddProduct extends Component {
         }
       );
       const tyreCompanyData = await response.json();
-      console.log("SubCategory Response:", tyreCompanyData);
+      console.log("tyreCom Response:", tyreCompanyData);
 
       const tyreCompanyOptions = tyreCompanyData.map(
         (tyreCompanydata) => tyreCompanydata.tyreCompanyName
@@ -241,7 +249,10 @@ class AddProduct extends Component {
 
     await this.setState({ selectedSubCategory });
 
-    this.fetchTyreCompanyOptions(selectedSubCategory);
+    this.fetchTyreCompanyOptions(
+      selectedSubCategory,
+      this.state.selectedCategory
+    );
     // Pass the selected Subcategory to fetch subcategories
   };
 
@@ -274,12 +285,13 @@ class AddProduct extends Component {
       productName,
       productPrice,
       productMrpPrice,
-      discount,
+      //      discount,
       productQuantity,
       skuCode,
       manufacturer,
       productDescription,
       productImages,
+      productIdToUpdate,
     } = this.state;
     try {
       const discountPercentage = await this.calculateDiscountPercentage(
@@ -307,52 +319,69 @@ class AddProduct extends Component {
         return;
       }
       if (!productImages || productImages.length === 0) {
-        // Display error message when there are no product images
         toast.warning("Please upload product images");
-        return; // Exit the function early if there are no images
+        return;
       }
 
-      const response = await axios.post(
-        process.env.REACT_APP_API_URL + "product/add",
-        {
-          categoryName: selectedCategory,
-          subCategoryName: selectedSubCategory,
-          brandName: selectedBrand,
-          productName: productName,
-          productPrice: productPrice,
-          productMrpPrice: productMrpPrice,
-          discount: discountPercentage,
-          productQuantity: productQuantity,
-          skuCode: skuCode,
-          manufacturer: manufacturer,
-          productDescription: productDescription,
-          productImages: this.state.productImages,
-          id: this.state.productIdToUpdate,
-          vehicleBrandModels: this.state.vehicleBrandModels,
-          tyreSize: this.state.tyreSize,
-        }
-      );
+      // const response = await axios.post(
+      //   process.env.REACT_APP_API_URL + "product/add",
+      const productData = {
+        categoryName: selectedCategory,
+        subCategoryName: selectedSubCategory,
+        brandName: selectedBrand,
+        productName: productName,
+        productPrice: productPrice,
+        productMrpPrice: productMrpPrice,
+        discount: discountPercentage,
+        productQuantity: productQuantity,
+        skuCode: skuCode,
+        manufacturer: manufacturer,
+        productDescription: productDescription,
+        productImages: this.state.productImages,
+        vehicleBrandModels: this.state.vehicleBrandModels,
+        tyreSize: this.state.tyreSize,
+      };
 
-      this.setState({
-        selectedCategory: "",
-        selectedSubCategory: "",
-        selectedBrand: "",
-        productName: "",
-        brandName: "",
-        productPrice: 0,
-        productMrpPrice: 0,
-        discount: 0,
-        productQuantity: 0,
-        skuCode: "",
-        manufacturer: "",
-        productDescription: "",
-        productImages: [],
-      });
+      let response;
 
-      if (response.status === 200) {
+      // Check if productIdToUpdate is present, if yes, update the product, else, add a new product
+      if (productIdToUpdate) {
+        console.log("productData : ", productData);
+        response = await axios.put(
+          process.env.REACT_APP_API_URL + `product/update/${productIdToUpdate}`,
+          productData
+        );
+      } else {
+        response = await axios.post(
+          process.env.REACT_APP_API_URL + "product/add",
+          productData
+        );
+      }
+
+      if (response.status === 201) {
+        this.setState({
+          selectedCategory: "",
+          selectedSubCategory: "",
+          selectedBrand: "",
+          productName: "",
+          brandName: "",
+          productPrice: 0,
+          productMrpPrice: 0,
+          discount: 0,
+          productQuantity: 0,
+          skuCode: "",
+          manufacturer: "",
+          productDescription: "",
+          productImages: [],
+        });
         toast.success("Product added successfully", { autoClose: 2000 });
+        console.log(response.status);
+      } else if (response.status === 200) {
+        toast.success("Product updated successfully", { autoClose: 2000 });
+        console.log(response.status);
       } else {
         toast.error("Failed to add product");
+        console.log(response.status);
       }
     } catch (error) {
       console.error("Error adding product:", error);
@@ -371,6 +400,7 @@ class AddProduct extends Component {
 
   handleImageUpload = async (e, images) => {
     const files = e.target.files;
+    const updatedImages = [...this.state.productImages];
     const reader = new FileReader();
 
     if (files.length > 5) {
@@ -386,13 +416,10 @@ class AddProduct extends Component {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
-      // Check if file size is less than 5MB
       if (file.size <= 5 * 1024 * 1024) {
-        // Convert file to base64 string
         try {
           const base64String = await fileToBase64(file);
-          // Push image data to productImages array
-          this.state.productImages.push({
+          updatedImages.push({
             dataURL: base64String,
             fileName: file.name,
             type: file.type,
@@ -412,9 +439,9 @@ class AddProduct extends Component {
       reader.readAsDataURL(file);
     }
 
-    // Update state with uploaded images
+    // Update state with uploaded image
     this.setState({
-      images: this.productImages,
+      productImages: updatedImages,
       imageIndex: null, // Reset the image index when new images are uploaded
     });
   };
@@ -441,214 +468,235 @@ class AddProduct extends Component {
     const isProductNameEmpty = this.state.productName.trim() === "";
 
     return (
-      <div className="add-product-container">
-        <div className="tab-buttons"></div>
-        <div className="tab-content">
-          <div>
-            <label>
-              Category
-              :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <select
-                id="categorySelectId"
-                value={this.state.selectedCategory}
-                onChange={this.handleCategoryChange}
-                disabled={this.state.defaultDisabled ? true : null}
-              >
-                <option value="">Select a category</option>
-                {this.state.categoryOptions.map((categoryName) => (
-                  <option key={categoryName} value={categoryName}>
-                    {categoryName}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              SubCategory:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <select
-                id="subCategorySelectId"
-                value={this.state.selectedSubCategory}
-                onChange={this.handleSubCategoryChange}
-                disabled={this.state.defaultDisabled ? true : null}
-              >
-                <option value="">Select a subcategory</option>
-                {this.state.subCategoryOptions.map((subcategoryName) => (
-                  <option key={subcategoryName} value={subcategoryName}>
-                    {subcategoryName}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Tyre Company :&nbsp;
-              <select
-                id="brandSelectId"
-                value={this.state.selectedBrand}
-                disabled={this.state.defaultDisabled ? true : null}
-                onChange={(e) =>
-                  this.setState({ selectedBrand: e.target.value })
-                }
-              >
-                <option value="">Select a Brand</option>
-                {this.state.tyreCompanyOptions.map((tyreCompanyName) => (
-                  <option key={tyreCompanyName} value={tyreCompanyName}>
-                    {tyreCompanyName}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Product Name<span style={{ color: "red" }}>*</span>:
-              <input
-                type="text"
-                value={this.state.productName}
-                onChange={(e) => this.setState({ productName: e.target.value })}
-                placeholder="Enter Product Name"
-                required
-              />
-            </label>
-            <label>
-              Tyre Size<span style={{ color: "red" }}>*</span>:
-              <input
-                type="text"
-                value={this.state.tyreSize}
-                onChange={(e) => this.setState({ tyreSize: e.target.value })}
-                placeholder="Enter Tyre Size"
-                required
-              />
-            </label>
-            <label>
-              Vehicles :
-              <Multiselect
-                options={this.state.options}
-                selectedValues={this.state.selectedValue}
-                onSelect={this.onSelect}
-                onRemove={this.onRemove}
-                displayValue="name"
-                disable={this.state.disabled}
-                selectionLimit={10}
-              />
-            </label>
-            <label>
-              Product Price<span style={{ color: "red" }}>*</span>:
-              <input
-                type="number"
-                value={this.state.productPrice}
-                onChange={(e) =>
-                  this.setState({ productPrice: e.target.value })
-                }
-                placeholder="Enter product price"
-                required
-              />
-            </label>
-            <label>
-              MRP Price<span style={{ color: "red" }}>*</span>:
-              <input
-                type="number"
-                value={this.state.productMrpPrice}
-                onChange={(e) =>
-                  this.setState({ productMrpPrice: e.target.value })
-                }
-                placeholder="Enter MRP price"
-                required
-              />
-            </label>
-            <label>
-              Product Qty<span style={{ color: "red" }}>*</span>:
-              <input
-                type="number"
-                value={this.state.productQuantity}
-                onChange={(e) =>
-                  this.setState({ productQuantity: e.target.value })
-                }
-                placeholder="Enter product quantity"
-                required
-              />
-            </label>
-            <label>
-              SKU Code<span style={{ color: "red" }}>*</span>:
-              <input
-                type="text"
-                value={this.state.skuCode}
-                onChange={(e) => this.setState({ skuCode: e.target.value })}
-                placeholder="Enter product quantity"
-                required
-              />
-            </label>
-            <label>
-              Manufacturer<span style={{ color: "red" }}>*</span>:
-              <input
-                type="text"
-                value={this.state.manufacturer}
-                onChange={(e) =>
-                  this.setState({ manufacturer: e.target.value })
-                }
-                placeholder="Enter product quantity"
-                required
-              />
-            </label>
-
-            <label>
-              Product Description:
-              <textarea
-                value={this.state.productDescription}
-                onChange={(e) =>
-                  this.setState({ productDescription: e.target.value })
-                }
-                placeholder="Enter product description"
-              />
-            </label>
-            <label>
-              <div>
-                {/* Input field for image upload */}
+      <>
+        {this.state.isAdmin ? (
+          <div className="add-product-container">
+            <div className="tab-buttons">
+              <div className="tab-content">
                 <div>
-                  Upload Images:
-                  <input
-                    type="file"
-                    multiple
-                    onChangeCapture={this.handleImageUpload}
-                  />
-                </div>
-                {/* Display uploaded images */}
-                <div className="image-preview">
-                  {this.state.productImages.map((image, index) => (
-                    <div className="image-preview-item" key={index}>
-                      <img
-                        src={image.dataURL}
-                        alt={`Product Imagee ${index + 1}`}
-                      />
+                  <label>
+                    Category
+                    :&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <select
+                      id="categorySelectId"
+                      value={this.state.selectedCategory}
+                      onChange={this.handleCategoryChange}
+                      disabled={this.state.defaultDisabled ? true : null}
+                    >
+                      <option value="">Select a category</option>
+                      {this.state.categoryOptions.map((categoryName) => (
+                        <option key={categoryName} value={categoryName}>
+                          {categoryName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-                      <p>Names: {image.fileName}</p>
+                  <label>
+                    SubCategory:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <select
+                      id="subCategorySelectId"
+                      value={this.state.selectedSubCategory}
+                      onChange={this.handleSubCategoryChange}
+                      disabled={this.state.defaultDisabled ? true : null}
+                    >
+                      <option value="">Select a subcategory</option>
+                      {this.state.subCategoryOptions.map((subcategoryName) => (
+                        <option key={subcategoryName} value={subcategoryName}>
+                          {subcategoryName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-                      <p>Description: {image.description}</p>
+                  <label>
+                    Tyre Company :&nbsp;
+                    <select
+                      id="brandSelectId"
+                      value={this.state.selectedBrand}
+                      disabled={this.state.defaultDisabled ? true : null}
+                      onChange={(e) =>
+                        this.setState({ selectedBrand: e.target.value })
+                      }
+                    >
+                      <option value="">Select a Brand</option>
+                      {this.state.tyreCompanyOptions.map((tyreCompanyName) => (
+                        <option key={tyreCompanyName} value={tyreCompanyName}>
+                          {tyreCompanyName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-                      <p>Size: {image.size} KB</p>
+                  <label>
+                    Product Name<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="text"
+                      value={this.state.productName}
+                      onChange={(e) =>
+                        this.setState({ productName: e.target.value })
+                      }
+                      placeholder="Enter Product Name"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Tyre Size<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="text"
+                      value={this.state.tyreSize}
+                      onChange={(e) =>
+                        this.setState({ tyreSize: e.target.value })
+                      }
+                      placeholder="Enter Tyre Size"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Vehicles :
+                    <Multiselect
+                      options={this.state.options}
+                      selectedValues={this.state.selectedValue}
+                      onSelect={this.onSelect}
+                      onRemove={this.onRemove}
+                      displayValue="name"
+                      disable={this.state.disabled}
+                      selectionLimit={10}
+                    />
+                  </label>
+                  <label>
+                    Product Price<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="number"
+                      value={this.state.productPrice}
+                      onChange={(e) =>
+                        this.setState({ productPrice: e.target.value })
+                      }
+                      placeholder="Enter product price"
+                      required
+                    />
+                  </label>
+                  <label>
+                    MRP Price<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="number"
+                      value={this.state.productMrpPrice}
+                      onChange={(e) =>
+                        this.setState({ productMrpPrice: e.target.value })
+                      }
+                      placeholder="Enter MRP price"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Product Qty<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="number"
+                      value={this.state.productQuantity}
+                      onChange={(e) =>
+                        this.setState({ productQuantity: e.target.value })
+                      }
+                      placeholder="Enter product quantity"
+                      required
+                    />
+                  </label>
+                  <label>
+                    SKU Code<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="text"
+                      value={this.state.skuCode}
+                      onChange={(e) =>
+                        this.setState({ skuCode: e.target.value })
+                      }
+                      placeholder="Enter product quantity"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Manufacturer<span style={{ color: "red" }}>*</span>:
+                    <input
+                      type="text"
+                      value={this.state.manufacturer}
+                      onChange={(e) =>
+                        this.setState({ manufacturer: e.target.value })
+                      }
+                      placeholder="Enter product quantity"
+                      required
+                    />
+                  </label>
 
-                      {/* <p > Type: {image.type}</p> */}
+                  <label>
+                    Product Description:
+                    <textarea
+                      value={this.state.productDescription}
+                      onChange={(e) =>
+                        this.setState({ productDescription: e.target.value })
+                      }
+                      placeholder="Enter product description"
+                    />
+                  </label>
+                  <label>
+                    <div>
+                      {/* Input field for image upload */}
+                      <div>
+                        Upload Images:
+                        <input
+                          type="file"
+                          multiple
+                          onChangeCapture={this.handleImageUpload}
+                        />
+                      </div>
+                      {/* Display uploaded images */}
+                      <div className="image-preview">
+                        {this.state.productImages.map((image, index) => (
+                          <div className="image-preview-item" key={index}>
+                            <img
+                              src={image.dataURL}
+                              alt={`Product Imagee ${index + 1}`}
+                            />
 
-                      <FaTimes
-                        className="delete-icon"
-                        onClick={() => this.handleDeleteImage(index)}
-                      />
+                            <p>Names: {image.fileName}</p>
+
+                            <p>Description: {image.description}</p>
+
+                            <p>Size: {image.size} KB</p>
+
+                            {/* <p > Type: {image.type}</p> */}
+
+                            <FaTimes
+                              className="delete-icon"
+                              onClick={() => this.handleDeleteImage(index)}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  </label>
+
+                  <button
+                    style={{ fontSize: "16px", width: "90%" }}
+                    onClick={this.handleAddProduct}
+                    disabled={isProductNameEmpty}
+                    className="ADD_Product"
+                  >
+                    {this.state.productIdToUpdate ? "Update" : "Add Product"}
+                  </button>
+
+                  <p
+                    className="next-subcategory"
+                    style={{ marginLeft: "100 px", padding: "50px" }}
+                  >
+                    <Link to="/home">
+                      <FaHome />
+                      Home
+                    </Link>
+                  </p>
                 </div>
               </div>
-            </label>
-
-            <button
-              onClick={this.handleAddProduct}
-              disabled={isProductNameEmpty}
-            >
-              {this.state.productIdToUpdate ? "Update" : "Add Product"}
-            </button>
-
-            <Link to="/categories">Back</Link>
+            </div>
           </div>
-        </div>
-      </div>
+        ) : null}
+      </>
     );
   }
 }

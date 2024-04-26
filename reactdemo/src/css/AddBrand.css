@@ -22,7 +22,7 @@
     cursor: pointer;
     background-color: #007bff;
     color: #fff;
-    font-size: 15px;
+
     transition: background-color 0.3s ease;
   }
   
@@ -102,7 +102,7 @@
   .tab-buttons button {
     width: 20%; /* Make buttons fill the width */
     margin-bottom: 5px; /* Add spacing between buttons */
-    font-size: 2px; /* Reduce font size for buttons */
+
   }
 
   .tab-content {

@@ -2,7 +2,7 @@
 import React, { Component } from "react";
 import "../css/PunctureRepair.css";
 import axios from "axios";
-import { FaWrench, FaMapMarkerAlt, FaPhone, FaCar } from "react-icons/fa"; // Import FaWrench icon from react-icons library
+import { FaWrench, FaMapMarkerAlt, FaPhone, FaCar } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 class PunctureRepair extends Component {
@@ -58,16 +58,25 @@ class PunctureRepair extends Component {
   };
 
   handleMobileNumberChange = (event) => {
-    this.setState({ mobileNumber: event.target.value });
+    const inputValue = event.target.value.replace(/\D/g, "");
+    this.setState({ mobileNumber: inputValue });
   };
 
   handleVehiclePlateNoChange = (event) => {
-    this.setState({ vehiclePlateNo: event.target.value.toUpperCase() });
+    const inputValue = event.target.value.replace(/[^a-zA-Z0-9]/g, "");
+
+    this.setState({ vehiclePlateNo: inputValue.toUpperCase() });
   };
 
   handleSubmit = async (event) => {
     event.preventDefault();
     const { location, mobileNumber, vehiclePlateNo } = this.state;
+
+    if (!location) {
+      alert("Please Location On");
+
+      return;
+    }
     // Validate inputs
     if (!this.isValidMobileNumber(mobileNumber)) {
       toast.warning("Invalid Mobile Number.");
@@ -97,6 +106,9 @@ class PunctureRepair extends Component {
           submitted: true,
           responseData: response.data,
         });
+
+        // Store the current time in local storage to track session expiration
+        localStorage.setItem("lastSubmissionTime", new Date().getTime());
       } else {
         console.log(response);
         toast.error("Failed to add product");
@@ -108,7 +120,7 @@ class PunctureRepair extends Component {
     this.sendRequestToAdmin(location, mobileNumber, vehiclePlateNo);
     setTimeout(() => {
       window.location.reload();
-    }, 20000);
+    }, 20000000);
     window.location =
       process.env.REACT_APP_API_URL_FOR_GUI +
       "/puncture-repair-list?mob=" +
@@ -142,7 +154,7 @@ class PunctureRepair extends Component {
   render() {
     // const API_endpoint = `https://api.openweathermap.org/data/3.0/onecall?`;
     // const API_key = `6de0b93cf8421ed7f14ce2b3bdc6b704`;
-    const { location, mobileNumber, vehiclePlateNo, submitted, responseData } =
+    const { mobileNumber, vehiclePlateNo, submitted, responseData } =
       this.state;
     return (
       <div className="container">
@@ -158,8 +170,11 @@ class PunctureRepair extends Component {
             <label>
               <input
                 type="text"
-                placeholder="Enter  location"
+                placeholder="Pease  location On"
                 value={this.state.location}
+                style={{
+                  backgroundColor: this.state.location ? "" : "#FFC0CB",
+                }}
               />
             </label>
           </div>
@@ -173,6 +188,9 @@ class PunctureRepair extends Component {
                 onKeyPress={this.restrictToNumbers}
                 value={mobileNumber}
                 onChange={this.handleMobileNumberChange}
+                style={{
+                  borderColor: /^\d{10}$/.test(mobileNumber) ? "" : "red",
+                }}
               />
             </label>
           </div>
@@ -180,6 +198,9 @@ class PunctureRepair extends Component {
             <label>
               <FaCar /> Vehicle Number :
               <input
+                style={{
+                  borderColor: vehiclePlateNo.length === 10 ? "" : "red",
+                }}
                 type="text"
                 placeholder="Enter Vehicle Number"
                 maxLength={10}
